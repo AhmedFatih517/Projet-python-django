@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Ordonnances - MediCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/signature_pad/1.5.3/signature_pad.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- Thème Épuré et Professionnel --- */
+        :root {
+            --font-family-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --background-body: #f4f6f9; /* Gris très clair et doux */
+            --background-card: #ffffff;
+            --text-primary: #1f2937;    /* Noir/Gris foncé pour textes principaux */
+            --text-secondary: #6b7280;  /* Gris moyen pour textes secondaires/labels */
+            --accent-color: #3b82f6;    /* Bleu moderne comme couleur d'accent */
+            --accent-hover-color: #2563eb;
+            --success-color: #10b981;   /* Vert épuré */
+            --danger-color: #ef4444;    /* Rouge épuré */
+            --border-color-soft: #e5e7eb; /* Bordure très claire */
+            --border-color-input: #d1d5db; /* Bordure pour inputs */
+            --shadow-color-base: rgba(0, 0, 0, 0.05); /* Base pour ombres subtiles */
+            --shadow-sm: 0 1px 2px 0 var(--shadow-color-base);
+            --shadow-md: 0 4px 6px -1px var(--shadow-color-base), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --border-radius: 0.375rem; /* 6px */
+            --border-radius-lg: 0.5rem;  /* 8px */
+            --transition-main: 0.2s ease-in-out;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-family-main);
+            background-color: var(--background-body);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.65;
+            font-size: 15px; /* Taille de base légèrement réduite pour un look plus fin */
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-card); padding: 0.9rem 2rem; display: flex;
+            justify-content: space-between; align-items: center; position: sticky;
+            top: 0; z-index: 1000; box-shadow: var(--shadow-sm); border-bottom: 1px solid var(--border-color-soft);
+        }
+        header .logo {
+            font-size: 1.6rem; font-weight: 700; color: #c53030; /* Rouge MediCare+ */
+            display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none;
+        }
+        header .logo i { color: #c53030; }
+        header nav ul { list-style: none; display: flex; gap: 0.5rem; padding: 0; margin: 0; }
+        header nav ul li a {
+            color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+            padding: 0.5rem 0.9rem; border-radius: var(--border-radius);
+            transition: background-color var(--transition-main), color var(--transition-main);
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        header nav ul li a i { color: var(--text-secondary); font-size: 1em; transition: color var(--transition-main); }
+        header nav ul li a:hover, header nav ul li a.active {
+            background-color: var(--accent-color); color: var(--text-light);
+        }
+        header nav ul li a:hover i, header nav ul li a.active i { color: var(--text-light); }
+        header nav ul li a:focus-visible { outline: 2px solid var(--accent-color); outline-offset: 2px; box-shadow: 0 0 0 2px var(--accent-color) inset; background-color: transparent;}
+
+
+        /* --- Main Content --- */
+        main { flex: 1; padding: 2.5rem 1.5rem; max-width: 900px; width: 100%; margin: 0 auto; }
+        main > h1 {
+            text-align: center; color: var(--text-primary); font-weight: 600;
+            font-size: clamp(1.7rem, 4vw, 2.2rem); margin-bottom: 2.5rem;
+        }
+        main > h1 i { margin-right: 0.75rem; color: var(--accent-color); }
+
+        .card {
+            background-color: var(--background-card); border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md); padding: 2rem; margin-bottom: 2.5rem;
+            border: 1px solid var(--border-color-soft);
+        }
+        .card h2 {
+            font-size: 1.3rem; color: var(--text-primary); font-weight: 600;
+            margin-bottom: 1.5rem; padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color-soft); text-align: left;
+        }
+        .card h2 i { margin-right: 0.6rem; color: var(--accent-color); }
+
+        /* Form Styling */
+        form#ordonnance-form { display: grid; gap: 1.5rem; }
+        fieldset { border: none; padding: 0; margin: 0 0 1rem 0; }
+        legend { font-weight: 600; font-size: 1.1rem; margin-bottom: 1rem; color: var(--accent-color); padding-top: 0.5rem; }
+        .form-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .form-group label {
+            font-weight: 600;
+            color: #333;
+        }
+        .form-group select,
+        .form-group textarea {
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            width: 100%;
+        }
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1.5rem;
+        }
+        .form-actions button {
+            padding: 0.75rem 1.5rem;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .form-actions button:hover {
+            background-color: #45a049;
+        }
+
+        label { font-weight: 500; display: flex; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text-secondary); }
+        label i { color: var(--text-secondary); width: 16px; text-align: center; }
+        label[for="rappel"] { flex-direction: row; align-items: center; font-weight: normal;}
+        label[for="rappel"] input[type="checkbox"] { width: auto; margin-right: 0.5rem; accent-color: var(--accent-color); }
+
+        input[type="text"], input[type="date"], input[type="file"], input[type="email"], input[type="tel"], select, textarea {
+            padding: 0.7rem 0.9rem; border-radius: var(--border-radius); border: 1px solid var(--border-color-input);
+            font-size: 0.95rem; width: 100%; font-family: inherit; color: var(--text-primary);
+            transition: border-color var(--transition-main), box-shadow var(--transition-main); background-color: var(--background-card);
+        }
+        input[type="text"]:focus, input[type="date"]:focus, input[type="file"]:focus, select:focus, textarea:focus {
+            border-color: var(--accent-color); outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); /* Ombre de focus plus discrète */
+        }
+        textarea { resize: vertical; min-height: 90px; }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 0.7rem center; background-size: 1.25em 1.25em;
+            padding-right: 2.5rem;
+        }
+        input[type="file"] { padding: 0.5rem; font-size: 0.85rem;} /* Ajustement pour input file */
+
+        /* Signature Pad & Stamp Preview */
+        .signature-pad { border: 1px solid var(--border-color-input); border-radius: var(--border-radius); cursor: crosshair; touch-action: none;}
+        #stampPreview { display: none; max-width: 200px; max-height:100px; margin-top:10px; border: 1px solid var(--border-color-soft); border-radius: var(--border-radius-md); object-fit: contain;}
+
+        /* Buttons */
+        .form-actions { margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap; justify-content: flex-end; }
+        button, .btn {
+            padding: 0.7rem 1.4rem; border: none; border-radius: var(--border-radius);
+            color: var(--text-light); font-size: 0.95rem; font-weight: 500; cursor: pointer;
+            transition: background-color var(--transition-main), transform var(--transition-main), box-shadow var(--transition-main);
+            display: inline-flex; align-items: center; gap: 0.5rem; text-decoration: none;
+        }
+        button i, .btn i { font-size: 0.9em; }
+
+        button[type="submit"] { background-color: var(--accent-color); }
+        button[type="submit"]:hover { background-color: var(--accent-hover-color); transform: translateY(-1px); box-shadow: var(--shadow-sm); }
+
+        .btn-secondary-outline {
+             background-color: transparent; color: var(--accent-color); border: 1px solid var(--accent-color);
+        }
+        .btn-secondary-outline:hover { background-color: var(--accent-color); color: var(--text-light); transform: translateY(-1px); }
+
+        .btn-pdf { background-color: var(--success-color); }
+        .btn-pdf:hover { background-color: #0f9d58; transform: translateY(-1px); } /* Vert plus foncé */
+
+
+        /* History Section */
+        .search-bar { display: flex; gap: 0.75rem; margin-bottom: 1.5rem; }
+        .search-bar input { flex-grow: 1; }
+        .btn-search { background-color: var(--text-secondary); color: var(--text-light); }
+        .btn-search:hover { background-color: var(--text-primary); }
+
+
+        .history { display: flex; flex-direction: column; gap: 1rem; }
+        .history-item {
+            background: var(--background-card); border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm); padding: 1.25rem;
+            border-left: 4px solid var(--accent-color);
+        }
+        .history-item strong { font-weight: 600; color: var(--text-primary); font-size: 1.05em; }
+        .history-item p { margin: 0.4rem 0; font-size: 0.9rem; color: var(--text-secondary); }
+        .history-item p i { margin-right: 0.5rem; color: var(--accent-color); width: 18px; text-align: center; }
+        .history-item .signature-display img, .history-item .stamp-display img {
+             border:1px solid var(--border-color-soft); max-width:180px; height:auto; margin-top: 5px; border-radius: 4px;
+        }
+
+
+        /* Confirmation / Toast */
+        #confirmation-message, #toast { /* Styles unifiés pour toast/confirmation */
+            visibility: hidden; min-width: 280px; background-color: #333; color: #fff;
+            text-align: center; border-radius: var(--border-radius); padding: 0.9rem 1.2rem;
+            position: fixed; z-index: 1050; left: 50%; bottom: 25px;
+            transform: translateX(-50%) translateY(20px); opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2); font-size: 0.9rem;
+        }
+        #confirmation-message.show, #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        #confirmation-message.success, #toast.success { background-color: var(--success-color); }
+        #confirmation-message.error, #toast.error { background-color: var(--danger-color); }
+
+
+        /* Footer */
+        footer {
+            background-color: var(--background-card); padding: 1.5rem 2rem; text-align: center;
+            color: var(--text-secondary); margin-top: auto; border-top: 1px solid var(--border-color-soft);
+            font-size: 0.875rem;
+        }
+        footer .social-icons a { margin: 0 0.75rem; color: var(--text-secondary); font-size: 1.2rem; transition: color var(--transition-main), transform var(--transition-main); }
+        footer .social-icons a:hover { color: var(--accent-color); transform: scale(1.1); }
+        footer .social-icons { margin-bottom: 0.75rem; }
+        footer .copyright { font-size: 0.85em; }
+
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header[role="banner"] { padding: 1rem; flex-direction: column; gap: 0.75rem; }
+            main { padding: 1.5rem 1rem; } .card { padding: 1.5rem; }
+            .form-grid { grid-template-columns: 1fr; }
+            .search-bar { flex-direction: column; }
+            .search-bar input, .search-bar button { width: 100%; margin-bottom: 0.5rem; }
+            .form-actions { justify-content: center; }
+            .form-actions button { flex-grow: 1; } /* Boutons prennent plus de place */
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            * { animation-duration: 0.001s !important; animation-iteration-count: 1 !important; transition-duration: 0.001s !important; scroll-behavior: auto !important; }
+        }
+
+        .ordonnances-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .ordonnance-item {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .ordonnance-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .ordonnance-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .patient-name {
+            color: #666;
+            font-weight: 500;
+        }
+
+        .ordonnance-content {
+            margin: 1rem 0;
+        }
+
+        .ordonnance-content pre {
+            white-space: pre-wrap;
+            font-family: inherit;
+            margin: 0;
+            padding: 1rem;
+            background-color: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .ordonnance-actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 1rem;
+        }
+
+        .btn-pdf {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background-color: #dc3545;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .btn-pdf:hover {
+            background-color: #c82333;
+        }
+
+        .no-ordonnances {
+            text-align: center;
+            color: #666;
+            padding: 2rem;
+            background-color: #f9f9f9;
+            border-radius: 8px;
+        }
+
+        .messages {
+            margin-bottom: 1.5rem;
+        }
+        .alert {
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+        }
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        .form-group input[readonly] {
+            background-color: #e9ecef;
+            cursor: not-allowed;
+        }
+
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="{% url 'index' %}" class="logo" aria-label="Accueil MediCare+"><i class="fas fa-heartbeat" aria-hidden="true"></i> Medicare+</a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'medecin_view' %}" class="active"><i class="fas fa-user-doctor"></i> Espace Médecin</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1><i class="fas fa-file-prescription"></i> Gestion des Ordonnances</h1>
+
+        <section class="card">
+            <h2><i class="fas fa-search"></i> Rechercher une Ordonnance</h2>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Rechercher par date, patient, médecin..." />
+                <button type="button" id="searchBtn" class="btn btn-search"><i class="fas fa-search"></i> Rechercher</button>
+            </div>
+        </section>
+
+        <section class="card">
+            <h2><i class="fas fa-plus-circle"></i> Nouvelle Ordonnance</h2>
+            {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            <form method="POST" id="ordonnance-form" enctype="multipart/form-data">
+                {% csrf_token %}
+                <fieldset>
+                    <legend><i class="fas fa-info-circle"></i> Informations Générales</legend>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="date"><i class="fa-regular fa-calendar-days"></i> Date d'émission</label>
+                            <input type="date" id="date" name="date" required />
+                        </div>
+                        <div class="form-group">
+                            <label for="id_patient"><i class="fa-solid fa-user"></i> Nom du patient</label>
+                            {{ form.patient }}
+                        </div>
+                        <div class="form-group">
+                            <label for="medecin"><i class="fa-solid fa-user-doctor"></i> Nom du médecin</label>
+                            <input type="text" id="medecin" name="medecin" value="{{ medecin_info.profile.user.get_full_name }}" readonly />
+                        </div>
+                        <div class="form-group">
+                            <label for="langue"><i class="fa-solid fa-language"></i> Langue</label>
+                            <select id="langue" name="langue">
+                                <option value="fr">Français</option>
+                                <option value="en">English</option>
+                                <option value="ar">العربية</option>
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fas fa-pills"></i> Prescription</legend>
+                    <div class="form-group">
+                        <label for="categorie"><i class="fa-solid fa-tags"></i> Catégorie de médicament</label>
+                        <select id="categorie" name="categorie" required>
+                            <option value="">-- Sélectionnez une catégorie --</option>
+                            <option value="antibiotique">Antibiotique</option>
+                            <option value="anti-inflammatoire">Anti-inflammatoire</option>
+                            <option value="analgésique">Analgésique</option>
+                            <option value="antihistaminique">Antihistaminique</option>
+                            <option value="autre">Autre</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="medicaments"><i class="fa-solid fa-tablets"></i> Médicaments prescrits (Nom, Dosage, Fréquence, Durée)</label>
+                        <textarea id="medicaments" name="medicaments" placeholder="Ex: Amoxicilline 500mg - 1 comp. 3 fois/jour pendant 7 jours&#10;Paracétamol 1g - 1 comp. si douleur, max 3/jour" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="date_fin"><i class="fa-regular fa-calendar-check"></i> Date de fin du traitement (si applicable)</label>
+                        <input type="date" id="date_fin" name="date_fin" />
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend><i class="fas fa-cogs"></i> Options</legend>
+                    <div class="form-group">
+                        <label for="remarques"><i class="fa-solid fa-comment-medical"></i> Remarques / Instructions</label>
+                        <textarea id="remarques" name="remarques" placeholder="Instructions spécifiques pour le patient ou le pharmacien..."></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="fichier_ordonnance"><i class="fa-solid fa-file-arrow-up"></i> Ordonnance Scannée (PDF/Image - si déjà existante)</label>
+                        <input type="file" id="fichier_ordonnance_originale" name="fichier_ordonnance_originale" accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+                    <div class="form-group">
+                        <label for="rappel">
+                            <input type="checkbox" id="rappel" name="rappel"/> Activer un rappel de renouvellement
+                        </label>
+                    </div>
+                </fieldset>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary"><i class="fa-solid fa-save"></i> Enregistrer Ordonnance</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="card">
+            <h2><i class="fa-solid fa-history"></i> Historique des Ordonnances</h2>
+            <div class="ordonnances-list">
+                {% for ordonnance in ordonnances %}
+                <div class="ordonnance-item">
+                    <div class="ordonnance-header">
+                        <h3>Ordonnance du {{ ordonnance.issued_at|date:"d/m/Y" }}</h3>
+                        <span class="patient-name">Patient: {{ ordonnance.patient.profile.user.get_full_name }}</span>
+                    </div>
+                    <div class="ordonnance-content">
+                        <p><strong>Catégorie:</strong> {{ ordonnance.category }}</p>
+                        <p><strong>Prescription:</strong></p>
+                        <pre>{{ ordonnance.content }}</pre>
+                        {% if ordonnance.notes %}
+                        <p><strong>Remarques:</strong></p>
+                        <pre>{{ ordonnance.notes }}</pre>
+                        {% endif %}
+                        {% if ordonnance.end_date %}
+                        <p><strong>Date de fin du traitement:</strong> {{ ordonnance.end_date|date:"d/m/Y" }}</p>
+                        {% endif %}
+                    </div>
+                    <div class="ordonnance-actions">
+                        <a href="{% url 'export_ordonnance_pdf' ordonnance.id %}" class="btn btn-pdf">
+                            <i class="fas fa-file-pdf"></i> Télécharger PDF
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="no-ordonnances">Aucune ordonnance n'a été créée pour le moment.</p>
+                {% endfor %}
+            </div>
+        </section>
+
+        <div id="toast" class="toast">Message</div>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const ordonnanceForm = document.getElementById('ordonnance-form');
+        const historiqueContainer = document.getElementById('ordonnances-historique');
+        const searchInput = document.getElementById('searchInput');
+        const searchBtn = document.getElementById('searchBtn'); // Récupération du bouton de recherche
+        const downloadPdfBtnAll = document.getElementById('downloadPdfBtnAll');
+        const toastEl = document.getElementById('toast');
+
+        // Signature Pad
+        const canvas = document.getElementById('signaturePadCanvas');
+        const signaturePad = new SignaturePad(canvas, {
+            backgroundColor: 'rgb(255, 255, 255)', // Important pour que toDataURL() ne soit pas transparent
+            penColor: 'rgb(0, 0, 0)'
+        });
+        const clearSignatureBtn = document.getElementById('clearSignatureBtn');
+        if (clearSignatureBtn) {
+            clearSignatureBtn.addEventListener('click', () => signaturePad.clear());
+        }
+        // Redimensionnement du canvas pour s'adapter
+        function resizeCanvas() {
+            const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            signaturePad.clear(); // Efface après redimensionnement car le contexte est perdu
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas(); // Appel initial
+
+
+        // Aperçu Cachet
+        const stampFileInput = document.getElementById('stampFile');
+        const stampPreview = document.getElementById('stampPreview');
+        if (stampFileInput) {
+            stampFileInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        stampPreview.src = e.target.result;
+                        stampPreview.style.display = 'block';
+                    }
+                    reader.readAsDataURL(file);
+                } else {
+                    stampPreview.src = '#';
+                    stampPreview.style.display = 'none';
+                }
+            });
+        }
+
+
+        let toastTimeout;
+        const ORDONNANCES_STORAGE_KEY = 'medicare_plus_ordonnances_v3'; // Clé mise à jour pour nouvelle structure
+        let ordonnances = [];
+
+        function showToast(message, isError = false, isSuccess = false) {
+            clearTimeout(toastTimeout);
+            toastEl.textContent = message;
+            toastEl.className = 'toast show';
+            if (isError) toastEl.classList.add('error');
+            if (isSuccess) toastEl.classList.add('success');
+            toastTimeout = setTimeout(() => { toastEl.classList.remove('show'); }, 3500); // Durée légèrement augmentée
+        }
+
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return String(str);
+            return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+        }
+
+        function loadOrdonnances() {
+            try {
+                const storedOrdonnances = localStorage.getItem(ORDONNANCES_STORAGE_KEY);
+                ordonnances = storedOrdonnances ? JSON.parse(storedOrdonnances) : [];
+                if (!Array.isArray(ordonnances)) ordonnances = [];
+            } catch (e) {
+                console.error("Erreur chargement ordonnances:", e); ordonnances = [];
+                showToast("Erreur de chargement des ordonnances.", true);
+            }
+        }
+
+        function saveOrdonnances() {
+            try { localStorage.setItem(ORDONNANCES_STORAGE_KEY, JSON.stringify(ordonnances)); }
+            catch (e) { console.error("Erreur sauvegarde ordonnances:", e); showToast("Erreur de sauvegarde, le stockage est peut-être plein.", true); }
+        }
+
+        function renderOrdonnances(filterQuery = "") {
+            historiqueContainer.innerHTML = '';
+            const filteredOrdonnances = ordonnances.filter(ord => {
+                const query = filterQuery.toLowerCase();
+                return query === "" || Object.values(ord).some(val => String(val).toLowerCase().includes(query));
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filteredOrdonnances.length === 0) {
+                historiqueContainer.innerHTML = `<p style="text-align:center; color: var(--text-secondary);">Aucune ordonnance ${filterQuery ? 'correspondante.' : 'enregistrée.'}</p>`;
+                return;
+            }
+
+            filteredOrdonnances.forEach(ord => {
+                const item = document.createElement('div');
+                item.classList.add('history-item');
+                // Formatage plus détaillé pour l'affichage
+                let detailsHtml = `
+                    <p><i class="fa-solid fa-user-doctor"></i> <strong>Médecin:</strong> ${escapeHTML(ord.medecin)}</p>
+                    <p><i class="fa-solid fa-pills"></i> <strong>Catégorie:</strong> ${escapeHTML(ord.categorie)}</p>
+                    <p><i class="fa-solid fa-tablets"></i> <strong>Médicaments:</strong><br><pre style="white-space: pre-wrap; font-family: inherit; margin-left:25px;">${escapeHTML(ord.medicaments)}</pre></p>
+                    ${ord.date_fin ? `<p><i class="fa-regular fa-calendar-check"></i> <strong>Fin traitement:</strong> ${escapeHTML(new Date(ord.date_fin).toLocaleDateString('fr-FR'))}</p>` : ''}
+                    ${ord.remarques ? `<p><i class="fa-solid fa-comment-medical"></i> <strong>Remarques:</strong><br><pre style="white-space: pre-wrap; font-family: inherit; margin-left:25px;">${escapeHTML(ord.remarques)}</pre></p>` : ''}
+                    ${ord.fichier_ordonnance_originale_nom ? `<p><i class="fa-solid fa-paperclip"></i> <strong>Fichier original:</strong> ${escapeHTML(ord.fichier_ordonnance_originale_nom)}</p>` : ''}
+                    <p><i class="fa-solid fa-bell"></i> <strong>Rappel:</strong> ${ord.rappel ? 'Activé' : 'Désactivé'}</p>
+                    <p><i class="fa-solid fa-language"></i> <strong>Langue:</strong> ${escapeHTML(ord.langue)}</p>
+                `;
+
+                if (ord.signatureDataUrl) {
+                    detailsHtml += `<div class="signature-display" style="margin-top:10px;"><p><strong>Signature:</strong></p><img src="${ord.signatureDataUrl}" alt="Signature" style="border:1px solid var(--border-color-soft); max-width:200px; height:auto; background-color:white;"/></div>`;
+                }
+                if (ord.stampDataUrl) {
+                    detailsHtml += `<div class="stamp-display" style="margin-top:10px;"><p><strong>Cachet:</strong></p><img src="${ord.stampDataUrl}" alt="Cachet" style="border:1px solid var(--border-color-soft); max-width:150px; max-height:100px; object-fit:contain; background-color:white;"/></div>`;
+                }
+
+                item.innerHTML = `
+                    <strong><i class="fa-regular fa-calendar-alt"></i> ${escapeHTML(new Date(ord.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }))} - <i class="fa-solid fa-user"></i> Patient: ${escapeHTML(ord.patient)}</strong>
+                    ${detailsHtml}
+                `;
+                historiqueContainer.appendChild(item);
+            });
+        }
+
+        ordonnanceForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const nouvelleOrdonnance = { id: Date.now() };
+            let stampDataUrl = null;
+            const stampFile = formData.get('stampFile');
+
+            if (stampFile && stampFile.size > 0) {
+                try {
+                    stampDataUrl = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(stampFile);
+                    });
+                } catch (error) {
+                    console.error("Erreur lecture fichier cachet:", error);
+                    showToast("Erreur lors du traitement de l'image du cachet.", true);
+                }
+            }
+
+
+            for (const [key, value] of formData.entries()) {
+                if (key === "fichier_ordonnance_originale") {
+                    nouvelleOrdonnance.fichier_ordonnance_originale_nom = value.name ? escapeHTML(value.name) : null;
+                } else if (key !== "stampFile") { // Ne pas stocker l'objet File du cachet directement
+                    nouvelleOrdonnance[key] = escapeHTML(value);
+                }
+            }
+            nouvelleOrdonnance.rappel = formData.has('rappel');
+            if (!signaturePad.isEmpty()) {
+                nouvelleOrdonnance.signatureDataUrl = signaturePad.toDataURL('image/png');
+            } else {
+                nouvelleOrdonnance.signatureDataUrl = null;
+            }
+            nouvelleOrdonnance.stampDataUrl = stampDataUrl;
+
+
+            if (!nouvelleOrdonnance.date || !nouvelleOrdonnance.patient || !nouvelleOrdonnance.medecin || !nouvelleOrdonnance.medicaments) {
+                 showToast("Veuillez remplir les champs obligatoires (date, patient, médecin, médicaments).", true);
+                 return;
+            }
+
+            ordonnances.push(nouvelleOrdonnance);
+            saveOrdonnances();
+            renderOrdonnances(searchInput.value);
+            showToast("Ordonnance ajoutée avec succès !", false, true);
+            this.reset();
+            signaturePad.clear();
+            stampPreview.style.display = 'none';
+            stampPreview.src = '#';
+            if(stampFileInput) stampFileInput.value = ""; // Réinitialise le champ fichier
+        });
+
+        if (searchBtn) { // Vérifie si le bouton existe
+            searchBtn.addEventListener('click', function() {
+                 renderOrdonnances(searchInput.value);
+            });
+        }
+        searchInput.addEventListener('input', function() { // Recherche en temps réel
+            renderOrdonnances(this.value);
+        });
+
+
+        downloadPdfBtnAll.addEventListener('click', function() {
+            if (ordonnances.length === 0) {
+                showToast("Aucune ordonnance à exporter.", true);
+                return;
+            }
+            showToast("Génération du PDF en cours...");
+
+            const pdfContent = document.createElement('div');
+            pdfContent.style.fontFamily = getComputedStyle(document.body).fontFamily; // Applique la police du body
+            pdfContent.style.fontSize = "10pt"; // Taille de police pour le PDF
+            pdfContent.style.padding = "20mm"; // Marges internes pour le contenu avant conversion
+
+            // En-tête Medicare+ pour le PDF
+            const pdfPageHeader = document.createElement('div');
+            pdfPageHeader.style.textAlign = 'left';
+            pdfPageHeader.style.marginBottom = '15mm';
+            pdfPageHeader.style.paddingBottom = '10mm';
+            pdfPageHeader.style.borderBottom = '1px solid #ccc';
+            pdfPageHeader.innerHTML = `
+                <div style="font-size: 1.5em; font-weight: bold; color: #a81313; display:flex; align-items:center;">
+                    <img src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiNhODEzMTMiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIiBjbGFzcz0ibHVjaWRlIGx1Y2lkZS1oZWFydC1wdWxzZSI+PHBhdGggZD0iTTExLjY1IDE4LjQxYTUtNSAwIDEgMCA3LjM1LTIuNjdMMTIgMjFsLTYuNjUtNS4yN2E1LTUgMCAxIDAgNy4zNSAyLjY2Ii8+PHBhdGggZD0iTTIgMTJINmwyLTQgMmwyIDQgMkwxMiAyTDEwIDEybDItMmg0Ii8+PC9zdmc+" alt="logo" style="width:24px; height:24px; margin-right:10px; vertical-align:middle;"> Medicare+
+                </div>
+                <p style="font-size: 0.8em; color: var(--text-secondary); margin-top: 5px;">Historique des Ordonnances</p>
+            `;
+            pdfContent.appendChild(pdfPageHeader);
+
+
+            const filteredOrdonnances = ordonnances.filter(ord => {
+                const query = searchInput.value.toLowerCase();
+                return query === "" || Object.values(ord).some(val => String(val).toLowerCase().includes(query));
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+
+            filteredOrdonnances.forEach(ord => {
+                const itemContainer = document.createElement('div');
+                itemContainer.style.marginBottom = '15mm';
+                itemContainer.style.paddingBottom = '10mm';
+                itemContainer.style.borderBottom = '1px dotted #eee';
+                itemContainer.style.pageBreakInside = 'avoid'; // Tente d'éviter coupure au milieu d'une ordonnance
+
+                let itemHtml = `
+                    <div style="font-size: 1.1em; font-weight: bold; margin-bottom: 5mm;">
+                        Ordonnance du ${escapeHTML(new Date(ord.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }))}
+                    </div>
+                    <div style="margin-left: 5mm;">
+                        <p><strong>Patient:</strong> ${escapeHTML(ord.patient)}</p>
+                        <p><strong>Médecin:</strong> ${escapeHTML(ord.medecin)}</p>
+                        <p><strong>Catégorie:</strong> ${escapeHTML(ord.categorie)}</p>
+                        <p><strong>Médicaments:</strong></p>
+                        <pre style="white-space: pre-wrap; font-family: inherit; font-size: inherit; margin-left:10mm; padding: 5px; background-color: #f9f9f9; border-radius: 4px;">${escapeHTML(ord.medicaments)}</pre>
+                        ${ord.date_fin ? `<p><strong>Fin traitement:</strong> ${escapeHTML(new Date(ord.date_fin).toLocaleDateString('fr-FR'))}</p>` : ''}
+                        ${ord.remarques ? `<p><strong>Remarques:</strong></p><pre style="white-space: pre-wrap; font-family: inherit; font-size: inherit; margin-left:10mm; padding: 5px; background-color: #f9f9f9; border-radius: 4px;">${escapeHTML(ord.remarques)}</pre>` : ''}
+                        ${ord.fichier_ordonnance_originale_nom ? `<p><strong>Fichier original:</strong> ${escapeHTML(ord.fichier_ordonnance_originale_nom)}</p>` : ''}
+                        <p><strong>Rappel:</strong> ${ord.rappel ? 'Activé' : 'Désactivé'}</p>
+                        <p><strong>Langue:</strong> ${escapeHTML(ord.langue)}</p>
+                    </div>
+                `;
+                if (ord.signatureDataUrl) {
+                    itemHtml += `<div style="margin-top:10mm;"><p style="font-weight:bold;">Signature:</p><img src="${ord.signatureDataUrl}" alt="Signature" style="border:1px solid #ccc; max-width:150px; height:auto;"/></div>`;
+                }
+                if (ord.stampDataUrl) {
+                    itemHtml += `<div style="margin-top:5mm;"><p style="font-weight:bold;">Cachet:</p><img src="${ord.stampDataUrl}" alt="Cachet" style="border:1px solid #ccc; max-width:120px; max-height:80px; object-fit:contain;"/></div>`;
+                }
+                itemContainer.innerHTML = itemHtml;
+                pdfContent.appendChild(itemContainer);
+            });
+
+            const opt = {
+                margin: [15, 15, 15, 15], // Marges en mm [top, left, bottom, right]
+                filename: `MedicarePlus_Ordonnances_${new Date().toISOString().slice(0,10)}.pdf`,
+                image: { type: 'jpeg', quality: 0.95 },
+                html2canvas: { scale: 2, useCORS: true, logging: false, windowWidth: pdfContent.scrollWidth, windowHeight: pdfContent.scrollHeight },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
+                pagebreak: { mode: ['avoid-all', 'css', 'legacy'] } // Tente d'améliorer la gestion des sauts de page
+            };
+
+            html2pdf().from(pdfContent).set(opt).save()
+                .then(() => { showToast("PDF de l'historique généré !", false, true); })
+                .catch(err => { showToast("Erreur lors de la génération du PDF.", true); console.error("Erreur PDF:", err); });
+        });
+
+        // Initialisation
+        loadOrdonnances();
+        renderOrdonnances();
+
+        const currentYearSpan = document.getElementById('current-year');
+        if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,519 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="messages mb-4">
+        <!-- Les messages d'alerte seront insérés ici -->
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-calendar-check'></i> Gestion des Rendez-vous</h2>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addAppointmentModal">
+                <i class='bx bx-plus'></i> Nouveau Rendez-vous
+            </button>
+        </div>
+    </div>
+
+    <!-- Filtres -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Médecin</label>
+                    <select class="form-select" id="doctorFilter">
+                        <option value="">Tous les médecins</option>
+                        {% for appointment in upcoming_appointments %}
+                        <option value="{{ appointment.doctor.id }}">
+                            Dr. {{ appointment.doctor.profile.user.get_full_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-control" id="dateFilter">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Statut</label>
+                    <select class="form-select" id="statusFilter">
+                        <option value="">Tous les statuts</option>
+                        <option value="upcoming">À venir</option>
+                        <option value="completed">Terminés</option>
+                        <option value="cancelled">Annulés</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Rendez-vous à venir -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0"><i class='bx bx-calendar'></i> Rendez-vous à venir</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover" id="appointmentsTable">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Patient</th>
+                            <th>Médecin</th>
+                            <th>Motif</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in upcoming_appointments %}
+                        <tr>
+                            <td>{{ appointment.date|date:"d/m/Y" }}</td>
+                            <td>{{ appointment.time|time:"H:i" }}</td>
+                            <td>{{ appointment.patient.profile.user.get_full_name }}</td>
+                            <td>Dr. {{ appointment.doctor.profile.user.get_full_name }}</td>
+                            <td>{{ appointment.reason }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info view-appointment" data-id="{{ appointment.id }}">
+                                    <i class='bx bx-show'></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning edit-appointment" data-id="{{ appointment.id }}">
+                                    <i class='bx bx-edit'></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger cancel-appointment" data-id="{{ appointment.id }}">
+                                    <i class='bx bx-x'></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Aucun rendez-vous à venir</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Rendez-vous passés -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0"><i class='bx bx-history'></i> Historique des rendez-vous</h5>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Heure</th>
+                            <th>Patient</th>
+                            <th>Médecin</th>
+                            <th>Motif</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for appointment in past_appointments %}
+                        <tr>
+                            <td>{{ appointment.date|date:"d/m/Y" }}</td>
+                            <td>{{ appointment.time|time:"H:i" }}</td>
+                            <td>{{ appointment.patient.profile.user.get_full_name }}</td>
+                            <td>Dr. {{ appointment.doctor.profile.user.get_full_name }}</td>
+                            <td>{{ appointment.reason }}</td>
+                            <td>
+                                <span class="badge bg-success">Terminé</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" class="text-center">Aucun rendez-vous passé</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Rendez-vous -->
+<div class="modal fade" id="addAppointmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class='bx bx-calendar-plus'></i> Nouveau Rendez-vous</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="appointmentForm">
+                    <div class="mb-3">
+                        <label class="form-label">Patient</label>
+                        <select class="form-select" name="patient" required>
+                            <option value="">Sélectionner un patient</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Médecin</label>
+                        <select class="form-select" name="doctor" required>
+                            <option value="">Sélectionner un médecin</option>
+                            <!-- Options will be populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Heure</label>
+                        <input type="time" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motif</label>
+                        <textarea class="form-control" rows="3" required></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                <button type="submit" form="appointmentForm" class="btn btn-primary">Ajouter</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Filtres
+        const doctorFilter = document.getElementById('doctorFilter');
+        const dateFilter = document.getElementById('dateFilter');
+        const statusFilter = document.getElementById('statusFilter');
+
+        [doctorFilter, dateFilter, statusFilter].forEach(filter => {
+            filter?.addEventListener('change', applyFilters);
+        });
+
+        async function applyFilters() {
+            try {
+                const params = new URLSearchParams({
+                    doctor: doctorFilter.value || '',
+                    date: dateFilter.value || '',
+                    status: statusFilter.value || ''
+                });
+
+                const response = await fetch(`/admin/appointment/filter/?${params}`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    updateAppointmentsTable(data.appointments);
+                } else {
+                    showError(data.error || 'Erreur lors du filtrage');
+                }
+            } catch (error) {
+                showError('Erreur lors du filtrage des rendez-vous');
+            }
+        }
+
+        // Gestion des rendez-vous
+        window.viewAppointment = async function(id) {
+            try {
+                const response = await fetch(`/admin/appointment/view/${id}/`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAppointmentDetails(data);
+                } else {
+                    showError(data.error || 'Erreur lors de la récupération des détails');
+                }
+            } catch (error) {
+                showError('Erreur lors de la récupération des détails du rendez-vous');
+            }
+        };
+
+        window.editAppointment = async function(id) {
+            try {
+                const response = await fetch(`/admin/appointment/edit/${id}/`);
+                const data = await response.json();
+
+                if (response.ok) {
+                    showEditForm(data);
+                } else {
+                    showError(data.error || 'Erreur lors de la récupération des données');
+                }
+            } catch (error) {
+                showError('Erreur lors de la modification du rendez-vous');
+            }
+        };
+
+        window.cancelAppointment = async function(id) {
+            if (confirm('Êtes-vous sûr de vouloir annuler ce rendez-vous ?')) {
+                try {
+                    const response = await fetch(`/admin/appointment/cancel/${id}/`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    });
+                    const data = await response.json();
+
+                    if (response.ok) {
+                        showSuccess(data.message);
+                        applyFilters(); // Rafraîchir la liste
+                    } else {
+                        showError(data.error || 'Erreur lors de l\'annulation');
+                    }
+                } catch (error) {
+                    showError('Erreur lors de l\'annulation du rendez-vous');
+                }
+            }
+        };
+
+        // Formulaire d'ajout
+        const appointmentForm = document.getElementById('appointmentForm');
+        appointmentForm?.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            try {
+                const response = await fetch('/admin/appointment/add/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCsrfToken()
+                    }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('Rendez-vous ajouté avec succès');
+                    bootstrap.Modal.getInstance(document.getElementById('addAppointmentModal')).hide();
+                    this.reset();
+                    applyFilters(); // Rafraîchir la liste
+                } else {
+                    showError(data.error || 'Erreur lors de l\'ajout');
+                }
+            } catch (error) {
+                showError('Erreur lors de l\'ajout du rendez-vous');
+            }
+        });
+
+        // Gestionnaires d'événements pour les boutons
+        document.querySelectorAll('.view-appointment').forEach(button => {
+            button.addEventListener('click', function() {
+                viewAppointment(this.dataset.id);
+            });
+        });
+
+        document.querySelectorAll('.edit-appointment').forEach(button => {
+            button.addEventListener('click', function() {
+                editAppointment(this.dataset.id);
+            });
+        });
+
+        document.querySelectorAll('.cancel-appointment').forEach(button => {
+            button.addEventListener('click', function() {
+                cancelAppointment(this.dataset.id);
+            });
+        });
+
+        // Fonctions utilitaires
+        function updateAppointmentsTable(appointments) {
+            const tbody = document.querySelector('#appointmentsTable tbody');
+            tbody.innerHTML = appointments.map(apt => `
+                <tr>
+                    <td>${apt.date}</td>
+                    <td>${apt.time}</td>
+                    <td>${apt.patient}</td>
+                    <td>${apt.doctor}</td>
+                    <td>${apt.reason}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info view-appointment" data-id="${apt.id}">
+                            <i class='bx bx-show'></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning edit-appointment" data-id="${apt.id}">
+                            <i class='bx bx-edit'></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger cancel-appointment" data-id="${apt.id}">
+                            <i class='bx bx-x'></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="text-center">Aucun rendez-vous trouvé</td></tr>';
+        }
+
+        function showAppointmentDetails(data) {
+            const modalHtml = `
+                <div class="modal fade" id="viewAppointmentModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Détails du Rendez-vous</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p><strong>Patient:</strong> ${data.patient}</p>
+                                <p><strong>Médecin:</strong> ${data.doctor}</p>
+                                <p><strong>Date:</strong> ${data.date}</p>
+                                <p><strong>Heure:</strong> ${data.time}</p>
+                                <p><strong>Motif:</strong> ${data.reason}</p>
+                                <p><strong>Notes:</strong> ${data.notes || 'Aucune note'}</p>
+                                <p><strong>Statut:</strong> ${data.status}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Supprimer l'ancien modal s'il existe
+            const oldModal = document.getElementById('viewAppointmentModal');
+            if (oldModal) {
+                oldModal.remove();
+            }
+
+            // Ajouter le nouveau modal
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('viewAppointmentModal'));
+            modal.show();
+        }
+
+        function showEditForm(data) {
+            const modalHtml = `
+                <div class="modal fade" id="editAppointmentModal" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Modifier le Rendez-vous</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <form id="editAppointmentForm">
+                                    <input type="hidden" name="appointment_id" value="${data.id}">
+                                    <div class="mb-3">
+                                        <label class="form-label">Patient</label>
+                                        <input type="text" class="form-control" value="${data.patient}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Médecin</label>
+                                        <input type="text" class="form-control" value="${data.doctor}" readonly>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Date</label>
+                                        <input type="date" class="form-control" name="date" value="${data.date}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Heure</label>
+                                        <input type="time" class="form-control" name="time" value="${data.time}" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Motif</label>
+                                        <textarea class="form-control" name="reason" rows="3" required>${data.reason}</textarea>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Notes</label>
+                                        <textarea class="form-control" name="notes" rows="3">${data.notes}</textarea>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <button type="submit" form="editAppointmentForm" class="btn btn-primary">Enregistrer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Supprimer l'ancien modal s'il existe
+            const oldModal = document.getElementById('editAppointmentModal');
+            if (oldModal) {
+                oldModal.remove();
+            }
+
+            // Ajouter le nouveau modal
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('editAppointmentModal'));
+            modal.show();
+
+            // Gestionnaire de soumission du formulaire d'édition
+            document.getElementById('editAppointmentForm')?.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const formData = new FormData(this);
+
+                try {
+                    const response = await fetch(`/admin/appointment/edit/${data.id}/`, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-CSRFToken': getCsrfToken()
+                        }
+                    });
+                    const responseData = await response.json();
+
+                    if (response.ok) {
+                        showSuccess(responseData.message);
+                        modal.hide();
+                        applyFilters(); // Rafraîchir la liste
+                    } else {
+                        showError(responseData.error || 'Erreur lors de la modification');
+                    }
+                } catch (error) {
+                    showError('Erreur lors de la modification du rendez-vous');
+                }
+            });
+        }
+
+        function showSuccess(message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            const alertsContainer = document.querySelector('.messages') || createAlertsContainer();
+            alertsContainer.innerHTML += alertHtml;
+        }
+
+        function showError(message) {
+            const alertHtml = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            const alertsContainer = document.querySelector('.messages') || createAlertsContainer();
+            alertsContainer.innerHTML += alertHtml;
+        }
+
+        function createAlertsContainer() {
+            const container = document.createElement('div');
+            container.className = 'messages mb-4';
+            document.querySelector('.container').insertBefore(container, document.querySelector('.row'));
+            return container;
+        }
+
+        function getCsrfToken() {
+            const name = 'csrftoken';
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %} 

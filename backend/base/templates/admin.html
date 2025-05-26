@@ -1,0 +1,480 @@
+<!-- administrateur.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administration - Medicare+{% endblock %}
+
+{% block content %}
+<div class="dashboard">
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- En-tête du dashboard -->
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            <h1>Tableau de bord administrateur</h1>
+            <p class="subtitle">Bienvenue, {{ user.get_full_name }}</p>
+        </div>
+    </div>
+
+    <!-- Statistiques -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Patients</h3>
+                <p class="stat-number">{{ stats.total_patients|default:"0" }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Médecins</h3>
+                <p class="stat-number">{{ stats.total_doctors|default:"0" }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-euro-sign"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Revenus du mois</h3>
+                <p class="stat-number">{{ stats.appointments_today|default:"0" }}€</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Menu de navigation -->
+    <div class="nav-grid">
+        <a href="{% url 'admin_appointments' %}" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="nav-content">
+                <h3>Rendez-vous</h3>
+                <p>Gérer les rendez-vous</p>
+            </div>
+        </a>
+        <a href="{% url 'admin_schedules' %}" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="nav-content">
+                <h3>Planning</h3>
+                <p>Gérer les horaires</p>
+            </div>
+        </a>
+        <a href="{% url 'gestion_salles' %}" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-door-open"></i>
+            </div>
+            <div class="nav-content">
+                <h3>Salles</h3>
+                <p>Gérer les salles</p>
+            </div>
+        </a>
+        <a href="{% url 'equipements' %}" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="nav-content">
+                <h3>Équipements</h3>
+                <p>Gérer les équipements</p>
+            </div>
+        </a>
+        <a href="{% url 'maintenance' %}" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-wrench"></i>
+            </div>
+            <div class="nav-content">
+                <h3>Maintenance</h3>
+                <p>Suivi des maintenances</p>
+            </div>
+        </a>
+        <a href="{% url 'admin_appointment_stats' %}" class="nav-card">
+            <div class="nav-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <div class="nav-content">
+                <h3>Statistiques</h3>
+                <p>Voir les statistiques</p>
+            </div>
+        </a>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="dashboard-content">
+        <!-- Colonne de gauche - Rendez-vous -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2>Rendez-vous du jour</h2>
+                <a href="{% url 'admin_appointments' %}" class="btn-link">
+                    <i class="fas fa-calendar"></i> Voir tout
+                </a>
+            </div>
+            <div class="appointments-list">
+                {% if appointments %}
+                    {% for appointment in appointments %}
+                    <div class="appointment-card">
+                        <div class="appointment-time">
+                            <i class="far fa-clock"></i>
+                            {{ appointment.time|time:"H:i" }}
+                        </div>
+                        <div class="appointment-info">
+                            <h3>{{ appointment.patient.profile.user.get_full_name }}</h3>
+                            <p>Dr. {{ appointment.doctor.profile.user.get_full_name }}</p>
+                        </div>
+                        <div class="appointment-status">
+                            <span class="status-badge {% if appointment.is_cancelled %}cancelled{% else %}upcoming{% endif %}">
+                                {{ appointment.status }}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="far fa-calendar"></i>
+                        <p>Aucun rendez-vous aujourd'hui</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Colonne de droite - Statistiques -->
+        <div class="content-section">
+            <div class="section-header">
+                <h2>Statistiques récentes</h2>
+                <a href="{% url 'admin_appointment_stats' %}" class="btn-link">
+                    <i class="fas fa-chart-bar"></i> Voir tout
+                </a>
+            </div>
+            <div class="stats-list">
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i class="fas fa-user-md"></i>
+                        <span>Médecins actifs</span>
+                    </div>
+                    <div class="stat-value">{{ stats.total_doctors|default:"0" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i class="fas fa-calendar-check"></i>
+                        <span>RDV ce mois</span>
+                    </div>
+                    <div class="stat-value">{{ stats.appointments_month|default:"0" }}</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">
+                        <i class="fas fa-euro-sign"></i>
+                        <span>Revenus du jour</span>
+                    </div>
+                    <div class="stat-value">{{ stats.revenue_today|default:"0" }}€</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .dashboard {
+        padding: 2rem;
+        max-width: 1400px;
+        margin: 0 auto;
+        background-color: #f8fafc;
+    }
+
+    .dashboard-header {
+        margin-bottom: 2rem;
+    }
+
+    .welcome-section h1 {
+        font-size: 2rem;
+        color: #1a202c;
+        margin-bottom: 0.5rem;
+    }
+
+    .subtitle {
+        color: #718096;
+        font-size: 1.1rem;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+    }
+
+    .stat-icon {
+        width: 48px;
+        height: 48px;
+        background: #ebf8ff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4299e1;
+        font-size: 1.5rem;
+    }
+
+    .stat-content h3 {
+        color: #718096;
+        font-size: 0.875rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-number {
+        color: #2d3748;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .nav-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .nav-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        transition: transform 0.2s;
+    }
+
+    .nav-card:hover {
+        transform: translateY(-2px);
+        background: #f7fafc;
+    }
+
+    .nav-icon {
+        width: 48px;
+        height: 48px;
+        background: #ebf8ff;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #4299e1;
+        font-size: 1.5rem;
+    }
+
+    .nav-content h3 {
+        color: #2d3748;
+        font-size: 1.1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .nav-content p {
+        color: #718096;
+        font-size: 0.875rem;
+    }
+
+    .dashboard-content {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 2rem;
+    }
+
+    .content-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+
+    .section-header h2 {
+        font-size: 1.25rem;
+        color: #2d3748;
+    }
+
+    .btn-link {
+        color: #4299e1;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.875rem;
+    }
+
+    .btn-link:hover {
+        text-decoration: underline;
+    }
+
+    .appointment-card {
+        background: #f8fafc;
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        transition: transform 0.2s;
+    }
+
+    .appointment-card:hover {
+        transform: translateX(2px);
+        background: #f1f5f9;
+    }
+
+    .appointment-time {
+        color: #4299e1;
+        font-weight: 600;
+    }
+
+    .appointment-info {
+        flex: 1;
+    }
+
+    .appointment-info h3 {
+        color: #2d3748;
+        font-size: 1rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .appointment-info p {
+        color: #718096;
+        font-size: 0.875rem;
+    }
+
+    .status-badge {
+        padding: 0.25rem 0.75rem;
+        border-radius: 9999px;
+        font-size: 0.75rem;
+        font-weight: 500;
+    }
+
+    .status-badge.upcoming {
+        background: #e6fffa;
+        color: #319795;
+    }
+
+    .status-badge.cancelled {
+        background: #fed7d7;
+        color: #e53e3e;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 2rem;
+        color: #a0aec0;
+    }
+
+    .empty-state i {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .stats-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .stat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem;
+        background: #f8fafc;
+        border-radius: 0.5rem;
+        transition: transform 0.2s;
+    }
+
+    .stat-item:hover {
+        transform: translateX(2px);
+        background: #f1f5f9;
+    }
+
+    .stat-label {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: #4a5568;
+    }
+
+    .stat-label i {
+        color: #4299e1;
+    }
+
+    .stat-value {
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .messages {
+        margin-bottom: 2rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-error {
+        background: #fed7d7;
+        color: #c53030;
+    }
+
+    .alert-success {
+        background: #c6f6d5;
+        color: #2f855a;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-content {
+            grid-template-columns: 1fr;
+        }
+
+        .nav-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}

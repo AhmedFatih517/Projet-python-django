@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Espace Patient - Medicare+</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: #e74c3c;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="#" class="logo">Medicare+</a>
+        <div class="user-info">
+            <span class="user-name">Nom d'utilisateur</span>
+            <a href="#" class="logout-btn">Se déconnecter</a>
+        </div>
+    </div>
+    <div class="container">
+        <h1>Espace Patient</h1>
+        <div class="dashboard">
+            <!-- Contenu de la section -->
+        </div>
+    </div>
+</body>
+</html> 

@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>MediCare+ | Consultation Dossiers Médicaux</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;      /* Bleu principal plus standard */
+            --primary-hover-color: #0056b3;
+            --secondary-color: #6c757d;     /* Gris pour éléments secondaires, plus sobre */
+            --secondary-hover-color: #5a6268;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --text-dark: #343a40;
+            --text-light: #ffffff;
+            --background-light: #f8f9fa;
+            --background-white: #ffffff;
+            --border-color: #dee2e6;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.07);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.09);
+            --border-radius: 0.375rem; /* ~6px */
+            --transition-speed: 0.25s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        header .logo {
+            font-size: clamp(1.6rem, 2.5vw, 2rem);
+            font-weight: 700;
+            color: #a81313;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+        header .logo i { color: #a81313; animation: gentlePulse 2s infinite ease-in-out; }
+        @keyframes gentlePulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+        header nav ul { list-style: none; display: flex; gap: 0.8rem; padding: 0; margin: 0; }
+        header nav ul li a {
+            color: var(--text-dark); text-decoration: none; font-weight: 500; font-size: 0.95rem;
+            padding: 0.6rem 1rem; border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, transform var(--transition-speed) ease;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        header nav ul li a i { color: var(--primary-color); font-size: 1.1em; }
+        header nav ul li a:hover, header nav ul li a.active {
+            background-color: var(--primary-color); color: var(--text-light); transform: scale(1.05); /* Correction scale */
+        }
+        header nav ul li a:hover i { color: var(--text-light); }
+        header nav ul li a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            padding: 2.5rem 1.5rem; /* Padding ajusté */
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 2.5rem;
+            font-size: clamp(1.8rem, 4vw, 2.5rem); /* Titre principal dynamique */
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .controls-section, .patient-list-section {
+            background: var(--background-white);
+            padding: 1.5rem 2rem; /* Padding ajusté */
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+        .controls-section h2, .patient-list-section h2 {
+            margin-bottom: 1.2rem;
+            color: var(--primary-color);
+            font-size: 1.4rem;
+            text-align: left; /* Alignement gauche pour titres de section */
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+        .controls-section h2 i, .patient-list-section h2 i { margin-right: 0.5rem; }
+
+
+        .filter-bar, .add-patient-form {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 0.75rem; /* Espace entre éléments */
+            flex-wrap: wrap;
+            align-items: center; /* Aligne verticalement */
+        }
+        .filter-bar input, .add-patient-form input[type="text"] {
+            flex: 1 1 200px; /* Permet de grandir et rétrécir, base 200px */
+            padding: 0.7rem 0.9rem; /* Padding ajusté */
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 0.95rem;
+        }
+        .filter-bar input:focus, .add-patient-form input[type="text"]:focus {
+             border-color: var(--primary-color);
+             box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+             outline: none;
+        }
+
+        .btn { /* Classe de base pour les boutons */
+            padding: 0.7rem 1.1rem; /* Padding ajusté */
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        .btn-primary { background-color: var(--primary-color); }
+        .btn-primary:hover { background-color: var(--primary-hover-color); transform: translateY(-1px); }
+        .btn-secondary { background-color: var(--secondary-color); }
+        .btn-secondary:hover { background-color: var(--secondary-hover-color); transform: translateY(-1px); }
+
+
+        .patient-list ul { list-style: none; }
+        .patient-list li {
+            padding: 0.9rem 1.2rem; /* Padding ajusté */
+            margin-bottom: 0.75rem; /* Espace ajusté */
+            background-color: #e9ecef; /* Fond plus neutre */
+            color: var(--text-dark);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            display: flex;
+            align-items: center;
+            border-left: 4px solid transparent; /* Pour indication active */
+        }
+        .patient-list li:hover {
+            background-color: var(--primary-hover-color);
+            color: var(--text-light);
+            transform: translateX(5px); /* Léger décalage au survol */
+            box-shadow: var(--shadow-sm);
+        }
+        .patient-list li.active {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            font-weight: 500;
+            border-left-color: var(--primary-hover-color); /* Indication active forte */
+        }
+        .patient-list li i { margin-right: 0.8rem; color: var(--primary-color); }
+        .patient-list li:hover i, .patient-list li.active i { color: var(--text-light); }
+
+        /* --- Patient Data Display --- */
+        .patient-data-section { /* Nouveau conteneur pour les détails */
+             background: var(--background-white);
+             padding: 1.5rem 2rem;
+             border-radius: var(--border-radius);
+             box-shadow: var(--shadow-md);
+             margin-top: 2rem; /* Espace si la liste est au-dessus */
+        }
+        .patient-data { animation: fadeIn 0.5s ease-in-out; }
+        .patient-data.hidden { display: none; }
+        .patient-data h3 {
+            text-align: center;
+            margin-bottom: 1.5rem; /* Espace accru */
+            font-size: 1.7rem;
+            color: var(--primary-color);
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .patient-data .buttons { /* Style boutons d'action dossier */
+            display: flex;
+            justify-content: center;
+            gap: 1rem; /* Espace ajusté */
+            margin-bottom: 1.5rem; /* Espace accru */
+        }
+
+        .patient-data table {
+            width: 100%;
+            background: var(--background-white);
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            border-collapse: separate; /* Permet border-radius sur table */
+            border-spacing: 0;
+            border: 1px solid var(--border-color);
+        }
+        .patient-data th, .patient-data td {
+            padding: 0.9rem 1.2rem; /* Padding ajusté */
+            border-bottom: 1px solid var(--border-color);
+            text-align: left;
+        }
+        .patient-data tr:last-child td { border-bottom: none; } /* Pas de bordure pour dernière ligne */
+        .patient-data th {
+            background-color: #e9ecef; /* Fond th plus clair */
+            color: var(--text-dark);
+            font-weight: 600; /* Th plus gras */
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .patient-data td { font-size: 0.95rem; color: var(--text-dark); }
+
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--background-white);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--secondary-color);
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        footer .social-icons a { margin: 0 10px; color: var(--primary-color); font-size: 1.25rem; transition: color var(--transition-speed) ease, transform var(--transition-speed) ease; }
+        footer .social-icons a:hover { color: var(--primary-hover-color); transform: scale(1.15); }
+        footer .social-icons { margin-bottom: 0.75rem; }
+        footer .copyright { font-size: 0.9em; }
+
+        /* --- Toast Notification --- */
+        .toast {
+            visibility: hidden; min-width: 280px; background-color: #333; color: #fff;
+            text-align: center; border-radius: var(--border-radius); padding: 1rem 1.5rem;
+            position: fixed; z-index: 1050; left: 50%; bottom: 30px;
+            transform: translateX(-50%) translateY(20px); opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        .toast.success { background-color: var(--success-color); }
+        .toast.error { background-color: var(--danger-color); }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            header { padding: 0.8rem 1rem; }
+            main { padding: 1.5rem 1rem; }
+            h1 { font-size: 1.8rem; margin-bottom: 1.5rem; }
+            .controls-section, .patient-list-section, .patient-data-section { padding: 1rem 1.2rem; }
+            .filter-bar, .add-patient-form { flex-direction: column; align-items: stretch; }
+            .filter-bar input, .add-patient-form input[type="text"], .add-patient-form button, .patient-data .buttons button { width: 100%; margin-bottom: 0.5rem;}
+            .patient-data .buttons { flex-direction: column; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="{% url 'index' %}" class="logo" aria-label="Accueil MediCare+">
+            <i class="fas fa-heartbeat" aria-hidden="true"></i> MEDICARE+
+        </a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'medecin_view' %}"><i class="fas fa-user" aria-hidden="true"></i> Mon espace</a></li>
+                <li><a href="{% url 'index' %}"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Consultation des Dossiers Médicaux</h1>
+
+        <section class="controls-section">
+            <h2><i class="fas fa-filter"></i> Contrôles</h2>
+            <div class="filter-bar">
+                <input type="text" id="searchInput" placeholder="Rechercher un patient par nom...">
+            </div>
+
+            <div class="add-patient-form">
+                <input type="text" id="newPatientName" placeholder="Nom complet du nouveau patient">
+                <button id="addPatientBtn" class="btn btn-success"><i class="fas fa-user-plus"></i> Ajouter Patient</button>
+            </div>
+        </section>
+
+        <section class="patient-list-section">
+            <h2><i class="fas fa-users"></i> Liste des Patients</h2>
+            <ul id="patientList">
+                </ul>
+        </section>
+
+        <section id="patientDataSection" class="patient-data-section patient-data hidden"></section>
+
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <div id="toast" class="toast">Message</div>
+
+    <script>
+        const PATIENTS_STORAGE_KEY = 'medicare_plus_patients_list';
+        const initialPatientsData = { // Données par défaut si localStorage est vide
+            "SARA HAJDAOUI": {
+                "Genre": "Femme", "Allergies": "Pollen", "Antécédents Médicaux": "Asthme",
+                "Médicaments Actuels": "Paracétamol", "Chirurgies Passées": "Appendicectomie",
+                "Vaccinations": "Tétanos, COVID-19", "Contact d'Urgence": "Mme inconito - 0123456789",
+                "État de Santé Général": "Bon état général, Fréquentes douleurs dorsales", "Groupe Sanguin": "O+",
+                "Symptômes Récents": "Maux de tête", "Antécédents Familiaux": "Maladies cardiaques",
+                "Habitudes de Vie": "Non-fumeur, Sport régulier", "Fumeur": "Non", "Alcool": "Non",
+                "Autres Observations": "Rien de particulier"
+            },
+            "AYA SIHADI": {
+                "Genre": "Femme", "Allergies": "Médicaments", "Antécédents Médicaux": "Aucune",
+                "Médicaments Actuels": "Insuline", "Chirurgies Passées": "Chirurgie cardiaque",
+                "Vaccinations": "Grippe, COVID-19", "Contact d'Urgence": "M. inconnu - 0987654321",
+                "État de Santé Général": "Bonne forme", "Groupe Sanguin": "A+",
+                "Symptômes Récents": "Fatigue", "Antécédents Familiaux": "Diabète", "Habitudes de Vie": "Non-fumeur",
+                "Fumeur": "Non", "Alcool": "Non", "Autres Observations": "Aucune"
+            }
+        };
+
+        let patients = {}; // Sera peuplé depuis localStorage ou initialPatientsData
+        const listEl = document.getElementById("patientList");
+        const patientDataSectionEl = document.getElementById("patientDataSection"); // Renommé pour clarté
+        const searchInput = document.getElementById("searchInput");
+        const newPatientNameInput = document.getElementById("newPatientName");
+        const addPatientBtn = document.getElementById("addPatientBtn");
+        const toast = document.getElementById('toast');
+        let currentActiveLi = null;
+        let toastTimeout;
+
+
+        function loadPatients() {
+            try {
+                const storedPatients = localStorage.getItem(PATIENTS_STORAGE_KEY);
+                if (storedPatients) {
+                    patients = JSON.parse(storedPatients);
+                    if (typeof patients !== 'object' || patients === null) { // Validation basique
+                        console.warn("Données patients invalides dans localStorage, utilisation des données par défaut.");
+                        patients = { ...initialPatientsData }; // Copie pour éviter modification de l'original
+                        savePatients(); // Sauvegarde les données par défaut si celles stockées étaient corrompues
+                    }
+                } else {
+                    patients = { ...initialPatientsData }; // Aucune donnée, utilise celles par défaut et sauvegarde
+                    savePatients();
+                }
+            } catch (error) {
+                console.error("Erreur lors du chargement des patients depuis localStorage:", error);
+                patients = { ...initialPatientsData }; // En cas d'erreur, utilise données par défaut
+                showToast("Erreur de chargement des données patients.", true);
+            }
+        }
+
+        function savePatients() {
+            try {
+                localStorage.setItem(PATIENTS_STORAGE_KEY, JSON.stringify(patients));
+            } catch (error) {
+                console.error("Erreur lors de la sauvegarde des patients dans localStorage:", error);
+                showToast("Erreur de sauvegarde des données patients.", true);
+            }
+        }
+
+        function renderPatients(filterQuery = "") {
+            listEl.innerHTML = "";
+            const filteredPatientNames = Object.keys(patients).filter(name =>
+                name.toLowerCase().includes(filterQuery.toLowerCase())
+            );
+
+            if (filteredPatientNames.length === 0) {
+                listEl.innerHTML = '<li style="cursor:default; background-color:transparent; text-align:center; color: var(--secondary-color);">Aucun patient trouvé.</li>';
+                return;
+            }
+
+            filteredPatientNames.forEach(name => {
+                const li = document.createElement("li");
+                li.innerHTML = `<i class="fas fa-user-circle"></i> ${escapeHTML(name)}`;
+                li.dataset.patientName = name; // Stocke le nom pour le retrouver
+                if (currentActiveLi && currentActiveLi.dataset.patientName === name) {
+                    li.classList.add("active");
+                    currentActiveLi = li; // Met à jour la référence si la liste est re-rendue
+                }
+                listEl.appendChild(li);
+            });
+        }
+
+        function showPatientData(name) {
+            if (currentActiveLi) currentActiveLi.classList.remove("active");
+            // Trouve le nouvel élément li actif dans la liste actuelle (après un filtre par exemple)
+            const newActiveLi = Array.from(listEl.children).find(li => li.dataset.patientName === name);
+            if (newActiveLi) {
+                 newActiveLi.classList.add("active");
+                 currentActiveLi = newActiveLi;
+            }
+
+
+            const data = patients[name];
+            if (!data) {
+                patientDataSectionEl.innerHTML = "<p>Données non trouvées pour ce patient.</p>";
+                patientDataSectionEl.classList.remove("hidden");
+                return;
+            }
+
+            const rows = Object.entries(data).map(
+                ([key, value]) => `<tr><th>${escapeHTML(key)}</th><td>${escapeHTML(value)}</td></tr>`
+            ).join("");
+
+            patientDataSectionEl.innerHTML = `
+                <h3>Dossier Médical de ${escapeHTML(name)}</h3>
+                <div class="buttons">
+                    <button id="exportPdfBtn" class="btn btn-primary"><i class="fas fa-file-pdf"></i> Exporter en PDF</button>
+                    <button id="hideDataBtn" class="btn btn-secondary"><i class="fas fa-eye-slash"></i> Masquer</button>
+                </div>
+                <div id="pdfTarget">
+                    <table>${rows}</table>
+                </div>
+            `;
+            patientDataSectionEl.classList.remove("hidden");
+
+            // Attacher les écouteurs d'événements aux nouveaux boutons
+            document.getElementById("exportPdfBtn").addEventListener('click', exportPDF);
+            document.getElementById("hideDataBtn").addEventListener('click', hideData);
+        }
+
+        function hideData() {
+            patientDataSectionEl.classList.add("hidden");
+            patientDataSectionEl.innerHTML = ""; // Vide le contenu pour propreté
+            if (currentActiveLi) currentActiveLi.classList.remove("active");
+            currentActiveLi = null;
+        }
+
+        function addPatient() {
+            const name = newPatientNameInput.value.trim();
+            if (!name) {
+                showToast("Veuillez entrer un nom pour le patient.", true);
+                return;
+            }
+            if (patients[name.toUpperCase()]) { // Vérifie en majuscules pour éviter doublons de casse
+                showToast("Ce patient existe déjà.", true);
+                return;
+            }
+            // Ajoute le patient avec des données de base.
+            // Pour une vraie application, ouvrir un formulaire de création complet serait mieux.
+            patients[name.toUpperCase()] = {
+                "Genre": "À compléter", "Allergies": "À compléter", "Antécédents Médicaux": "À compléter",
+                "Médicaments Actuels": "À compléter", "Chirurgies Passées": "À compléter",
+                "Vaccinations": "À compléter", "Contact d'Urgence": "À compléter",
+                "État de Santé Général": "À compléter", "Groupe Sanguin": "À compléter",
+                "Symptômes Récents": "À compléter", "Antécédents Familiaux": "À compléter",
+                "Habitudes de Vie": "À compléter", "Fumeur": "À compléter", "Alcool": "À compléter",
+                "Autres Observations": "Dossier créé, à compléter."
+            };
+            savePatients();
+            renderPatients(searchInput.value); // Re-render avec filtre actuel
+            newPatientNameInput.value = "";
+            showToast(`Patient "${escapeHTML(name)}" ajouté avec succès.`, false, true);
+        }
+
+        function exportPDF() {
+            if (!currentActiveLi || !currentActiveLi.dataset.patientName) {
+                 showToast("Veuillez sélectionner un patient pour exporter son dossier.", true);
+                 return;
+            }
+            const patientNameForExport = currentActiveLi.dataset.patientName;
+            const contentToExport = patientDataSectionEl.querySelector("#pdfTarget");
+
+            if (!contentToExport) {
+                showToast("Erreur: Contenu à exporter non trouvé.", true);
+                return;
+            }
+
+            const pdfHeader = document.createElement('div');
+            pdfHeader.style.textAlign = 'left';
+            pdfHeader.style.marginBottom = '25px';
+            pdfHeader.style.paddingBottom = '15px';
+            pdfHeader.style.borderBottom = '2px solid #333'; // Ligne de séparation plus visible
+            pdfHeader.innerHTML = `
+                <span style="font-size: 1.8em; font-weight: bold; color: #a81313; vertical-align: middle;">
+                    <i class="fas fa-heartbeat" style="margin-right: 10px; color: #a81313;"></i>Medicare+
+                </span>
+                <p style="font-size: 0.9em; color: #555; margin-top: 5px;">Dossier Médical Patient</p>
+            `;
+
+            const pdfWrapper = document.createElement('div');
+            // Styles pour s'assurer que le contenu est bien rendu dans le PDF
+            pdfWrapper.style.padding = "20px"; // Ajoute un padding autour du contenu dans le PDF
+            pdfWrapper.appendChild(pdfHeader);
+            pdfWrapper.appendChild(contentToExport.cloneNode(true));
+
+            const opt = {
+                margin:       [0.7, 0.5, 0.7, 0.5], // top, left, bottom, right en inches
+                filename:     `dossier_${patientNameForExport.replace(/\s+/g, '_')}.pdf`,
+                image:        { type: 'jpeg', quality: 0.98 },
+                html2canvas:  { scale: 2, useCORS: true, logging: false, scrollY: -window.scrollY }, // Fix pour contenu coupé parfois
+                jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+            };
+
+            showToast("Génération du PDF en cours...");
+            html2pdf().from(pdfWrapper).set(opt).save()
+                .then(() => {
+                    showToast("PDF généré avec succès !", false, true);
+                })
+                .catch(err => {
+                    console.error('Erreur lors de la génération du PDF:', err);
+                    showToast("Erreur lors de la génération du PDF.", true);
+                });
+        }
+
+        // --- Initialisation & Écouteurs d'événements ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPatients(); // Charge les patients depuis localStorage ou données par défaut
+            renderPatients(); // Affiche la liste initiale
+
+            searchInput.addEventListener("input", function () {
+                renderPatients(this.value);
+            });
+
+            addPatientBtn.addEventListener('click', addPatient);
+
+            listEl.addEventListener('click', function(e) {
+                const li = e.target.closest('li');
+                if (li && li.dataset.patientName) { // S'assure que c'est un item patient
+                    showPatientData(li.dataset.patientName);
+                }
+            });
+
+            // Mise à jour de l'année du copyright
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+        });
+
+        function showToast(message, isError = false, isSuccess = false) {
+            clearTimeout(toastTimeout);
+            toast.textContent = message;
+            toast.className = 'toast show'; // Reset classes
+            if (isError) toast.classList.add('error');
+            if (isSuccess) toast.classList.add('success');
+
+            toastTimeout = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        function escapeHTML(str) {
+            if (typeof str !== 'string') return str;
+            return str.replace(/&/g, '&amp;')
+                      .replace(/</g, '&lt;')
+                      .replace(/>/g, '&gt;')
+                      .replace(/"/g, '&quot;')
+                      .replace(/'/g, '&#039;');
+        }
+
+        // 1. Créer l'élément d'en-tête pour le PDF
+const pdfHeader = document.createElement('div');
+pdfHeader.style.textAlign = 'left';
+pdfHeader.style.marginBottom = '25px';
+pdfHeader.style.paddingBottom = '15px';
+pdfHeader.style.borderBottom = '2px solid #333'; // Ligne de séparation plus visible
+pdfHeader.innerHTML = `
+    <span style="font-size: 1.8em; font-weight: bold; color: #a81313; vertical-align: middle;">
+        <i class="fas fa-heartbeat" style="margin-right: 10px; color: #a81313;"></i>Medicare+
+    </span>
+    <p style="font-size: 0.9em; color: #555; margin-top: 5px;">Dossier Médical Patient</p>
+`;
+
+// 2. Créer un conteneur temporaire pour assembler le contenu du PDF
+const pdfWrapper = document.createElement('div');
+// Styles pour s'assurer que le contenu est bien rendu dans le PDF
+pdfWrapper.style.padding = "20px"; // Ajoute un padding autour du contenu dans le PDF
+pdfWrapper.appendChild(pdfHeader); // L'EN-TÊTE EST AJOUTÉ ICI
+pdfWrapper.appendChild(contentToExport.cloneNode(true)); // Puis le contenu principal
+
+    </script>
+</body>
+</html>

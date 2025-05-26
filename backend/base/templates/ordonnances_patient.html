@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="csrf-token" content="{{ csrf_token }}">
+  <title>Mes Ordonnances - MediCare+</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <style>
+    :root {
+      --main-color: #4CAF50;
+      --secondary-color: #f4f4f9;
+      --text-color: #333;
+      --card-bg: #fff;
+      --radius: 16px;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: var(--secondary-color);
+      color: var(--text-color);
+    }
+
+    header {
+            background: hwb(0 97% 3% / 0.932);
+            padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+            position: relative;
+            z-index: 2;
+    }
+
+        header .logo {
+      font-size: 1.8rem;
+            color: #a81313;
+      font-weight: bold;
+        }
+
+        header .logo i {
+            margin-right: 10px;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 1.2rem;
+    }
+
+    nav ul li a {
+            color: rgb(8, 8, 8);
+            text-decoration: underline;
+      font-weight: 500;
+            font-size: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 8px;
+            transition: 0.4s ease;
+    }
+
+    nav ul li a:hover {
+            background-color: #3af387;
+            color: white;
+            transform: scale(0.1);
+            text-decoration: none;
+    }
+
+    h2 {
+      text-align: center;
+      margin-top: 1rem;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 2rem auto;
+      padding: 1rem;
+    }
+
+    .search-bar {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .search-bar input {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+    }
+
+    .search-bar button {
+      padding: 0.75rem 1.2rem;
+      background-color: #3e9e45;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .card {
+      background-color: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+      animation: fadeIn 0.6s ease;
+    }
+
+    .card h3 {
+      margin-top: 0;
+      color: var(--main-color);
+    }
+
+    .ordonnance-actions {
+            margin-top: 1.5rem;
+            display: flex;
+            justify-content: flex-end;
+    }
+
+        .ordonnance-actions a {
+      background-color: #2196F3;
+      color: white;
+      border: none;
+            padding: 0.8rem 1.5rem;
+      border-radius: 8px;
+      cursor: pointer;
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(33, 150, 243, 0.3);
+        }
+
+        .ordonnance-actions a:hover {
+            background-color: #1976D2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(33, 150, 243, 0.4);
+        }
+
+        .ordonnance-actions a i {
+            font-size: 1.1rem;
+    }
+
+    @keyframes fadeIn {
+      from {opacity: 0; transform: translateY(20px);}
+      to {opacity: 1; transform: translateY(0);}
+    }
+
+    @media (max-width: 600px) {
+      .search-bar {
+        flex-direction: column;
+      }
+    }
+
+        footer {
+            background-color: #fbfeff;
+            padding: 20px;
+      text-align: center;
+            color: rgb(28, 90, 184);
+        }
+
+        .social-icons {
+            margin-bottom: 10px;
+    }
+
+        .social-icons a {
+            margin: 0 10px;
+            color: rgb(14, 116, 102);
+            font-size: 24px;
+            transition: color 0.3s;
+}
+
+        .social-icons a:hover {
+            color: #060f2e;
+        }
+
+        .copyright {
+            font-size: 14px;
+}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo"><i class="fas fa-heartbeat"></i> Medicare+</div>
+    <nav>
+      <ul>
+                <li><a href="{% url 'patient_view' %}"><i class="fas fa-user"></i> Mon espace</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main>
+    <h2><i class="fa-solid fa-prescription-bottle-medical"></i> Mes Ordonnances</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% else %}alert-info{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="search-bar">
+      <form method="GET" action="">
+        {% csrf_token %}
+        <input type="text" name="search" placeholder="Rechercher une ordonnance..." value="{{ request.GET.search }}">
+        <button type="submit"><i class="fas fa-search"></i> Rechercher</button>
+      </form>
+    </div>
+
+    <div id="ordonnances-container">
+            {% for ordonnance in ordonnances %}
+            <div class="card">
+                <h3>Ordonnance du {{ ordonnance.issued_at|date:"d/m/Y" }}</h3>
+                <p><strong>Médecin :</strong> Dr. {{ ordonnance.doctor.profile.user.get_full_name }}</p>
+                <p><strong>Médicaments :</strong> {{ ordonnance.content|linebreaks }}</p>
+                <div class="ordonnance-actions">
+                    <a href="{% url 'export_ordonnance_pdf' ordonnance.id %}">
+                        <i class="fa-solid fa-download"></i> Télécharger PDF
+      </a>
+    </div>
+    </div>
+            {% empty %}
+          <div class="card">
+                <p>Aucune ordonnance trouvée.</p>
+            </div>
+            {% endfor %}
+          </div>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+          </div>
+        <div class="copyright">
+            &copy; 2025 MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <script>
+    // Ajout de l'en-tête CSRF pour les requêtes AJAX
+    document.addEventListener('DOMContentLoaded', function() {
+      // Fonction pour obtenir le cookie CSRF
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+          const cookies = document.cookie.split(';');
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+              cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      // Configurer l'en-tête CSRF pour toutes les requêtes AJAX
+      const csrftoken = getCookie('csrftoken');
+      if (csrftoken) {
+        document.querySelector('meta[name="csrf-token"]').setAttribute('content', csrftoken);
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,225 @@
+/* --- Variables CSS (Nouvelle Palette et Thème) --- */
+:root {
+    --font-family-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --background-body: #f7f8fc; /* Gris très clair, presque blanc cassé */
+    --background-card: #ffffff;
+    --text-primary: #1a202c;    /* Noir doux / Gris très foncé */
+    --text-secondary: #718096;  /* Gris moyen pour textes secondaires */
+    --accent-color: #3b82f6;    /* Bleu moderne et accessible */
+    --accent-hover-color: #2563eb;
+    --border-color: #e2e8f0;       /* Bordure très claire */
+    --shadow-color-subtle: rgba(45, 55, 72, 0.05);
+    --shadow-color-medium: rgba(45, 55, 72, 0.1);
+    --border-radius-md: 0.5rem;  /* 8px */
+    --border-radius-lg: 0.75rem; /* 12px */
+    --transition-main: 0.2s ease-out;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--font-family-sans);
+    background-color: var(--background-body);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    line-height: 1.65;
+}
+
+/* --- Header --- */
+header[role="banner"] {
+    background: var(--background-card);
+    padding: 1rem 2.5rem; /* Padding horizontal augmenté */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky; top: 0; z-index: 1000; /* z-index élevé */
+    box-shadow: 0 1px 3px var(--shadow-color-subtle);
+    border-bottom: 1px solid var(--border-color);
+}
+
+header .logo {
+    font-size: 1.75rem; font-weight: 700; color: #c53030; /* Rouge foncé pour le logo */
+    display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none;
+}
+
+header .logo i { color: #c53030; }
+
+header nav ul { list-style: none; display: flex; gap: 0.5rem; padding: 0; margin: 0; }
+
+header nav ul li a {
+    color: var(--text-secondary); text-decoration: none; font-weight: 500; font-size: 0.9rem;
+    padding: 0.6rem 1rem; border-radius: var(--border-radius-md);
+    transition: background-color var(--transition-main), color var(--transition-main);
+    display: inline-flex; align-items: center; gap: 0.4rem;
+}
+
+header nav ul li a i { color: var(--text-secondary); font-size: 1em; transition: color var(--transition-main); }
+
+header nav ul li a:hover, header nav ul li a.active {
+    background-color: var(--accent-color); color: var(--text-light);
+}
+
+header nav ul li a:hover i, header nav ul li a.active i { color: var(--text-light); }
+
+header nav ul li a:focus-visible {
+    outline: 2px solid var(--accent-color); outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); /* Ombre de focus plus subtile */
+}
+
+/* --- Main Content --- */
+main {
+    flex: 1; padding: 3rem 2rem; /* Plus de padding vertical */
+    max-width: 1280px; width: 100%; margin: 0 auto;
+}
+
+main > h1 {
+    text-align: center; color: var(--text-primary); font-weight: 700;
+    font-size: clamp(2rem, 5vw, 2.75rem); margin-bottom: 3rem;
+}
+
+main > h1 i { margin-right: 0.8rem; color: var(--accent-color); }
+
+/* Dashboard Cards Container */
+.dashboard-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+}
+
+/* Dashboard Card Styling - Nouveau Style */
+section.dashboard-card {
+    background-color: var(--background-card);
+    border-radius: var(--border-radius-lg); /* Plus arrondi */
+    box-shadow: 0 4px 6px -1px var(--shadow-color-subtle), 0 2px 4px -1px var(--shadow-color-medium);
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    transition: transform var(--transition-main), box-shadow var(--transition-main);
+    border: 1px solid var(--border-color);
+}
+
+section.dashboard-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 10px 15px -3px var(--shadow-color-subtle), 0 4px 6px -2px var(--shadow-color-medium);
+}
+
+section.dashboard-card .card-icon { /* Conteneur pour l'icône */
+    font-size: 2.5rem; /* Icône plus grande */
+    color: var(--accent-color);
+    margin-bottom: 1.25rem;
+    width: 64px; /* Taille fixe pour le conteneur icône */
+    height: 64px;
+    background-color: #e0e7ff; /* Léger fond pour l'icône (bleu très clair) */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+section.dashboard-card h2 { /* Titre de la carte */
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    text-align: left; /* Titre aligné à gauche */
+}
+
+section.dashboard-card .card-description { /* Description dans la carte */
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    flex-grow: 1; /* Pour que le bouton soit poussé en bas */
+    text-align: left; /* Description alignée à gauche */
+}
+
+/* Boutons dans les cartes - Nouveau Style */
+.btn-card-action {
+    padding: 0.65rem 1.25rem;
+    border: 1px solid var(--accent-color);
+    border-radius: var(--border-radius-md);
+    color: var(--accent-color);
+    background-color: transparent; /* Style "ghost button" */
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color var(--transition-main), color var(--transition-main);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    align-self: flex-start; /* Aligne le bouton à gauche */
+}
+
+.btn-card-action i { transition: transform var(--transition-main); }
+
+.btn-card-action:hover {
+    background-color: var(--accent-color);
+    color: var(--text-light);
+}
+
+.btn-card-action:hover i {
+    transform: translateX(3px); /* Petite animation sur l'icône du bouton */
+}
+
+.btn-card-action:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* --- Footer --- */
+footer {
+    background-color: var(--background-card);
+    padding: 1.5rem 2rem;
+    text-align: center;
+    color: var(--text-secondary);
+    margin-top: auto;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.875rem;
+}
+
+footer .social-icons a {
+    margin: 0 0.75rem;
+    color: var(--text-secondary); /* Icônes sociales plus sobres */
+    font-size: 1.2rem;
+    transition: color var(--transition-main), transform var(--transition-main);
+}
+
+footer .social-icons a:hover { color: var(--accent-color); transform: scale(1.1); }
+
+footer .social-icons { margin-bottom: 0.75rem; }
+
+footer .copyright { font-size: 0.85em; }
+
+/* --- Responsive --- */
+@media (max-width: 992px) {
+    .dashboard-cards { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+    section.dashboard-card { padding: 1.5rem; }
+}
+
+@media (max-width: 768px) {
+    header[role="banner"] { padding: 1rem; flex-direction: column; gap: 0.75rem; }
+    header nav ul { justify-content: center; flex-wrap: wrap; }
+    main { padding: 2rem 1rem; }
+    main > h1 { font-size: 1.8rem; margin-bottom: 2rem; }
+    .dashboard-cards { grid-template-columns: 1fr; }
+    section.dashboard-card .card-icon { width: 56px; height: 56px; font-size: 2rem; }
+    section.dashboard-card h2 { font-size: 1.15rem; }
+    .btn-card-action { width: 100%; justify-content: center; } /* Bouton pleine largeur sur mobile */
+}
+
+/* --- Accessibilité: Réduction des Mouvements --- */
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * {
+        animation-duration: 0.001s !important; /* Quasi-nul */
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001s !important;
+        scroll-behavior: auto !important;
+    }
+    header .logo i { animation: none; }
+} 

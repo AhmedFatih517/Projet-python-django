@@ -1,0 +1,226 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-door-open'></i> Gestion des Salles</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addRoomModal">
+            <i class='bx bx-plus'></i> Nouvelle Salle
+        </button>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tableau des salles -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Numéro</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Capacité</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salle in salles %}
+                        <tr>
+                            <td>{{ salle.numero }}</td>
+                            <td>{{ salle.type }}</td>
+                            <td>
+                                <span class="badge {% if salle.status == 'Disponible' %}bg-success{% elif salle.status == 'Occupée' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ salle.status }}
+                                </span>
+                            </td>
+                            <td>{{ salle.capacite }} personnes</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="viewRoom({{ salle.id }})">
+                                    <i class='bx bx-show'></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="editRoom({{ salle.id }})">
+                                    <i class='bx bx-edit'></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteRoom({{ salle.id }})">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucune salle enregistrée</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Salle -->
+<div class="modal fade" id="addRoomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class='bx bx-plus-circle'></i> Nouvelle Salle</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addRoomForm" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_room">
+                    <div class="mb-3">
+                        <label class="form-label">Numéro de salle</label>
+                        <input type="text" class="form-control" name="numero" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type de salle</label>
+                        <select class="form-select" name="type_salle" required>
+                            <option value="">Sélectionner un type</option>
+                            {% for type in types_salles %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Capacité</label>
+                        <input type="number" class="form-control" name="capacite" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Équipements</label>
+                        <textarea class="form-control" name="equipements" rows="3" placeholder="Liste des équipements..."></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour voir/éditer une salle -->
+<div class="modal fade" id="roomModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Le contenu sera injecté dynamiquement -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewRoom(id) {
+    fetch(`/admin/room/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const modalContent = `
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails de la Salle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Numéro:</strong> ${data.numero}</p>
+                    <p><strong>Type:</strong> ${data.type}</p>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <p><strong>Capacité:</strong> ${data.capacite} personnes</p>
+                    <p><strong>Équipements:</strong> ${data.equipements || 'Aucun'}</p>
+                </div>
+            `;
+            document.querySelector('#roomModal .modal-content').innerHTML = modalContent;
+            const modal = new bootstrap.Modal(document.getElementById('roomModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de la récupération des détails de la salle');
+        });
+}
+
+function editRoom(id) {
+    fetch(`/admin/room/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const modalContent = `
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier la Salle</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="edit_room">
+                        <input type="hidden" name="room_id" value="${id}">
+                        <div class="mb-3">
+                            <label class="form-label">Numéro de salle</label>
+                            <input type="text" class="form-control" name="numero" value="${data.numero}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type de salle</label>
+                            <select class="form-select" name="type_salle" required>
+                                {% for type in types_salles %}
+                                <option value="{{ type }}" ${data.type === '{{ type }}' ? 'selected' : ''}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Capacité</label>
+                            <input type="number" class="form-control" name="capacite" value="${data.capacite}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Équipements</label>
+                            <textarea class="form-control" name="equipements" rows="3">${data.equipements || ''}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.querySelector('#roomModal .modal-content').innerHTML = modalContent;
+            const modal = new bootstrap.Modal(document.getElementById('roomModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de la récupération des détails de la salle');
+        });
+}
+
+function deleteRoom(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette salle ?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_room">
+            <input type="hidden" name="room_id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %} 

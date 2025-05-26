@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Administration - Medicare+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-user-shield"></i> Administration</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="dashboard-cards">
+        <!-- Carte Utilisateurs -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-users-cog"></i>
+            </div>
+            <h2>Gestion Utilisateurs</h2>
+            <p class="card-description">Gérez les comptes utilisateurs et leurs droits d'accès.</p>
+            <a href="{% url 'admin:auth_user_changelist' %}" class="btn-card-action">
+                Gérer les utilisateurs <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Carte Médecins -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <h2>Gestion Médecins</h2>
+            <p class="card-description">Gérez les profils et les disponibilités des médecins.</p>
+            <a href="{% url 'admin:base_medecin_changelist' %}" class="btn-card-action">
+                Gérer les médecins <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Carte Patients -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-hospital-user"></i>
+            </div>
+            <h2>Gestion Patients</h2>
+            <p class="card-description">Gérez les dossiers et les informations des patients.</p>
+            <a href="{% url 'admin:base_patient_changelist' %}" class="btn-card-action">
+                Gérer les patients <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Carte Configuration -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-cogs"></i>
+            </div>
+            <h2>Configuration</h2>
+            <p class="card-description">Configurez les paramètres généraux de l'application.</p>
+            <a href="{% url 'admin:index' %}" class="btn-card-action">
+                Paramètres système <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+    </div>
+</div>
+{% endblock %} 

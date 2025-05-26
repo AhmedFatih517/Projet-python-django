@@ -1,0 +1,8 @@
+{% block content %}
+<h2>👤Mon profil</h2>
+<ul>
+    <li>Nom : {{ profile.user.first_name }}</li>
+    <li>Email : {{ profile.user.email }}</li>
+    <li>Rôle : {{ profile.user.get_role_display }}</li>
+</ul>
+{% endblock %}

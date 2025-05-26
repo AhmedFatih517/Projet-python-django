@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Dossier Médical Journalier - MediCare+</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --text-dark: #343a40;
+            --text-light: #ffffff;
+            --background-body: #f0f2f5; /* Fond de page légèrement différent */
+            --background-section: #ffffff;
+            --border-color: #dee2e6;
+            --border-color-input: #ced4da;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 10px rgba(0,0,0,0.08);
+            --border-radius: 0.375rem; /* ~6px */
+            --transition-speed: 0.25s;
+            --input-padding-y: 0.7rem;
+            --input-padding-x: 0.9rem;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-body);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-section);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky; top: 0; z-index: 100;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        header .logo {
+            font-size: clamp(1.6rem, 2.5vw, 2rem); font-weight: 700; color: #a81313;
+            display: inline-flex; align-items: center; gap: 0.7rem; text-decoration: none;
+        }
+        header .logo i { color: #a81313; }
+        /* Nav dans le header (optionnelle pour cette page, mais style cohérent) */
+        header nav ul { list-style: none; display: flex; gap: 0.8rem; padding: 0; margin: 0; }
+        header nav ul li a {
+            color: var(--text-dark); text-decoration: none; font-weight: 500; font-size: 0.95rem;
+            padding: 0.6rem 1rem; border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease, transform var(--transition-speed) ease;
+            display: inline-flex; align-items: center; gap: 0.4rem;
+        }
+        header nav ul li a i { color: var(--primary-color); font-size: 1.1em; }
+        header nav ul li a:hover, header nav ul li a.active {
+            background-color: var(--primary-color); color: var(--text-light); transform: scale(1.05);
+        }
+        header nav ul li a:hover i { color: var(--text-light); }
+        header nav ul li a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+
+        /* --- Main Content Area --- */
+        main.container {
+            flex: 1; display: flex; flex-direction: column;
+            padding: 2rem 1.5rem; max-width: 1000px; width: 100%; margin: 0 auto;
+        }
+
+        /* --- Section de Sélection de Rôle (Nouvelle) --- */
+        #role-selection-container {
+            display: flex; /* Sera contrôlé par JS */
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1; /* Prend l'espace vertical disponible */
+            text-align: center;
+            padding: 2rem;
+        }
+        .role-selection-box {
+            background-color: var(--background-section);
+            padding: 2.5rem 3rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            max-width: 500px;
+            width: 100%;
+        }
+        .role-selection-box h1 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 1rem;
+        }
+        .role-selection-box p {
+            color: var(--secondary-color);
+            margin-bottom: 2rem;
+            font-size: 1.05em;
+        }
+        .role-selection-box label {
+            display: block;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-dark);
+        }
+        .role-selection-box select {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            font-size: 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color-input);
+            background-color: var(--background-section);
+            margin-bottom: 1.5rem; /* Espace avant un éventuel bouton "Continuer" */
+            /* Apparence de flèche custom (reprise) */
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right 1rem center; background-size: 16px 12px;
+            padding-right: 3rem; /* Espace pour la flèche */
+        }
+        .role-selection-box select:focus {
+            border-color: var(--primary-color); outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+
+
+        /* Sections de contenu principal (Form, History, Chart) */
+        .main-app-content { /* Nouveau conteneur pour les sections après sélection de rôle */
+            display: none; /* Caché initialement, montré par JS */
+            width: 100%;
+        }
+        .content-section {
+            background: var(--background-section);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+        .content-section h2 { /* Titres des sections comme Formulaire, Historique etc. */
+            color: var(--primary-hover-color);
+            font-size: 1.5em; /* Taille ajustée */
+            text-align: left;
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 0.6rem;
+            margin-top: 0; /* Pas de marge en haut si premier élément */
+            margin-bottom: 1.5rem;
+        }
+        .content-section h2 i { margin-right: 0.6rem; }
+
+
+        /* Form Styling (Uniforme) */
+        form, fieldset { border: none; margin-bottom: 1rem; }
+        legend { font-weight: bold; font-size: 1.2rem; margin-bottom: 1rem; color: var(--primary-color); padding-top: 0.5rem; }
+        label { display: block; margin-top: 1rem; margin-bottom: 0.3rem; font-size: 0.95rem; font-weight: 500; color: var(--text-dark); }
+
+        input[type="text"], input[type="date"], input[type="number"], select, textarea {
+            width: 100%; padding: var(--input-padding-y) var(--input-padding-x);
+            margin-top: 0.25rem; border-radius: var(--border-radius);
+            border: 1px solid var(--border-color-input); font-size: 1rem; color: var(--text-dark);
+            background-color: var(--background-section);
+            transition: border-color var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+        }
+        input[type="text"]:focus, input[type="date"]:focus, input[type="number"]:focus, select:focus, textarea:focus {
+            border-color: var(--primary-color); outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        textarea { min-height: 100px; resize: vertical; }
+        input[type="number"] { -moz-appearance: textfield; }
+        input[type="number"]::-webkit-outer-spin-button, input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        /* Select dans les formulaires (pas celui de sélection de rôle) */
+        form select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat; background-position: right var(--input-padding-x) center; background-size: 16px 12px;
+            padding-right: calc(var(--input-padding-x) * 2.5);
+        }
+
+        /* Button Styling (Uniforme) */
+        button, .btn {
+            margin-top: 1.5rem; padding: 0.75rem 1.5rem; border: none;
+            color: var(--text-light); border-radius: var(--border-radius); cursor: pointer;
+            font-size: 1rem; font-weight: 500;
+            transition: background-color var(--transition-speed) ease, transform var(--transition-speed) ease, box-shadow var(--transition-speed) ease;
+            display: inline-flex; align-items: center; gap: 0.5rem;
+        }
+        button[type="submit"], .btn-primary { background-color: var(--primary-color); }
+        button[type="submit"]:hover, .btn-primary:hover { background-color: var(--primary-hover-color); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
+
+        .export-btn { background-color: var(--success-color); }
+        .export-btn:hover { background-color: var(--success-hover-color); }
+        .delete-btn { background-color: var(--danger-color); font-size: 0.85em; padding: 0.4rem 0.8rem; margin-top: 0.5rem; }
+        .delete-btn:hover { background-color: #c82333; }
+
+
+        /* History List */
+        .search-bar {
+            width: 100%; padding: var(--input-padding-y) var(--input-padding-x);
+            margin-bottom: 1.5rem; border-radius: var(--border-radius);
+            border: 1px solid var(--border-color-input); font-size: 1rem;
+        }
+        .entry {
+            background-color: #eef1f5; /* Fond plus clair et neutre pour entrées */
+            border-radius: var(--border-radius); margin: 0.75rem 0; padding: 1rem 1.2rem;
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-speed) ease, background-color var(--transition-speed) ease;
+            border-left: 4px solid var(--info-color);
+        }
+        .entry:hover { background-color: #e2e8f0; transform: scale(1.01); }
+        .entry .date { font-weight: bold; color: var(--primary-hover-color); margin-bottom: 0.5rem; font-size: 1.05em;}
+        .entry .details { font-size: 0.95em; color: var(--text-dark); line-height: 1.5; }
+        .entry .details strong { font-weight: 500; color: var(--text-dark); }
+
+        /* Chart Section */
+        #chart-section { text-align: center; }
+        #painChart { max-height: 400px; width: 100% !important; margin-bottom: 1rem; background-color: #fafafa; border-radius: var(--border-radius); padding:0.5rem; border: 1px solid var(--border-color)}
+
+
+        /* Visibility Control */
+        .hidden { display: none !important; }
+
+        /* Footer */
+        footer {
+            background-color: var(--background-section); padding: 1.5rem 2rem; text-align: center;
+            color: var(--secondary-color); margin-top: auto; border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        footer .social-icons a { margin: 0 10px; color: var(--primary-color); font-size: 1.25rem; transition: color var(--transition-speed) ease, transform var(--transition-speed) ease; }
+        footer .social-icons a:hover { color: var(--primary-hover-color); transform: scale(1.15); }
+        footer .social-icons { margin-bottom: 0.75rem; }
+        footer .copyright { font-size: 0.9em; }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden; min-width: 280px; background-color: #333; color: #fff;
+            text-align: center; border-radius: var(--border-radius); padding: 1rem 1.5rem;
+            position: fixed; z-index: 1050; left: 50%; bottom: 30px;
+            transform: translateX(-50%) translateY(20px); opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2); font-size: 0.95rem;
+        }
+        #toast.show { visibility: visible; opacity: 1; transform: translateX(-50%) translateY(0); transition: opacity 0.3s ease, transform 0.3s ease; }
+        #toast.success { background-color: var(--success-color); }
+        #toast.error { background-color: var(--danger-color); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header { padding: 0.8rem 1rem; flex-direction: column; gap: 0.8rem; }
+            main.container { padding: 1rem; }
+            h1 { font-size: 1.6em; margin-bottom: 1.5rem; }
+            .content-section h2 { font-size: 1.3em; }
+            .content-section { padding: 1rem 1.2rem; }
+            .role-selection-box { padding: 1.5rem; }
+            .role-selection-box h1 { font-size: 1.5em; }
+            button, .btn { font-size: 0.95rem; padding: 0.65rem 1.2rem; width: 100%; margin-left:0; margin-right:0;}
+            .export-btn { width: auto; display: block; margin: 1rem auto; } /* Centre boutons export */
+             #history-section .search-bar { width:100%; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+        }
+
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="{% url 'dossier_journalier' %}" class="logo" aria-label="Accueil MediCare+"><i class="fas fa-heartbeat" aria-hidden="true"></i> Medicare+</a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'dossier_journalier' %}"><i class="fas fa-hand-pointer"></i> selecteur de choix</a></li>
+                </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <section id="role-selection-container">
+            <div class="role-selection-box">
+                <h1>Dossier Médical Journalier</h1>
+                <p>Veuillez sélectionner votre rôle pour continuer.</p>
+                <label for="role">Je suis un :</label>
+                <select id="role">
+                    <option value="">-- Choisir un rôle --</option>
+                    <option value="patient">Patient</option>
+                    <option value="medecin">Médecin</option>
+                </select>
+                </div>
+        </section>
+
+        <div id="main-app-content" class="main-app-content">
+            <section id="form-section" class="content-section hidden">
+                <h2><i class="fas fa-pen-to-square"></i> Saisie Journalière</h2>
+                <form id="daily-form">
+                    <fieldset>
+                        <legend>Informations générales</legend>
+                        <label for="date">Date :</label>
+                        <input type="date" id="date" required />
+                        <label for="symptomes">Symptômes :</label>
+                        <textarea id="symptomes" placeholder="Décrivez vos symptômes..."></textarea>
+                        <label for="remarques">Remarques supplémentaires :</label>
+                        <textarea id="remarques" placeholder="Autres informations à signaler..."></textarea>
+                    </fieldset>
+                    <fieldset>
+                        <legend>Mesures de santé</legend>
+                        <label for="douleur">Niveau de douleur (0-10) :</label>
+                        <input type="number" id="douleur" min="0" max="10" placeholder="Ex: 3" />
+                        <label for="tension">Tension artérielle (ex: 120/80) :</label>
+                        <input type="text" id="tension" placeholder="Ex: 120/80" />
+                        <label for="temperature">Température corporelle (°C) :</label>
+                        <input type="number" step="0.1" id="temperature" placeholder="Ex: 37.2" />
+                        <label for="frequence">Fréquence cardiaque (bpm) :</label>
+                        <input type="number" id="frequence" placeholder="Ex: 75" />
+                    </fieldset>
+                    <fieldset>
+                        <legend>État général</legend>
+                        <label for="sommeil">Qualité du sommeil :</label>
+                        <select id="sommeil"> <option value="">-- Choisir --</option> <option>Excellent</option> <option>Bon</option> <option>Moyen</option> <option>Mauvais</option> </select>
+                        <label for="appetit">Appétit :</label>
+                        <select id="appetit"> <option value="">-- Choisir --</option> <option>Bon</option> <option>Normal</option> <option>Faible</option> <option>Perte totale</option> </select>
+                        <label for="humeur">Humeur :</label>
+                        <select id="humeur"> <option value="">-- Choisir --</option> <option>Heureux(se)</option> <option>Fatigué(e)</option> <option>Stressé(e)</option> <option>Triste</option> <option>Anxieux(se)</option><option>Normal(e)</option> </select>
+                    </fieldset>
+                    <button type="submit"><i class="fas fa-save"></i> Enregistrer</button>
+                    <button type="button" id="downloadPDF" class="export-btn"><i class="fas fa-file-pdf"></i> Exporter Journal PDF</button>
+                </form>
+            </section>
+
+            <section id="chart-section" class="content-section hidden">
+                <h2><i class="fas fa-chart-line"></i> Évolution des Données</h2>
+                <canvas id="painChart"></canvas>
+                <button type="button" id="downloadChart" class="export-btn"><i class="fas fa-download"></i> Exporter Graphique (Image)</button>
+            </section>
+
+            <section id="history-section" class="content-section hidden">
+                <h2><i class="fas fa-history"></i> Historique des Entrées</h2>
+                <input class="search-bar" type="text" id="search" placeholder="Rechercher (symptômes, humeur, date...)" />
+                <div id="history-list"></div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <div id="toast" class="toast">Message</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const roleSelect = document.getElementById("role");
+            const roleSelectionContainer = document.getElementById("role-selection-container");
+            const mainAppContent = document.getElementById("main-app-content");
+
+            const formSection = document.getElementById("form-section");
+            const chartSection = document.getElementById("chart-section");
+            const historySection = document.getElementById("history-section");
+            const form = document.getElementById("daily-form");
+            const historyList = document.getElementById("history-list");
+            const searchInput = document.getElementById("search");
+            const downloadPdfBtn = document.getElementById("downloadPDF");
+            const downloadChartBtn = document.getElementById("downloadChart");
+            const toastEl = document.getElementById('toast');
+
+            let chartInstance;
+            let journalEntries = [];
+            const JOURNAL_STORAGE_KEY = "medicare_plus_journal_v2"; // Changé la clé pour éviter conflits
+            let toastTimeout;
+
+            function showToast(message, isError = false, isSuccess = false) {
+                clearTimeout(toastTimeout);
+                toastEl.textContent = message;
+                toastEl.className = 'toast show';
+                if (isError) toastEl.classList.add('error');
+                if (isSuccess) toastEl.classList.add('success');
+                toastTimeout = setTimeout(() => { toastEl.classList.remove('show'); }, 3000);
+            }
+
+            function escapeHTML(str) {
+                if (typeof str !== 'string') return String(str);
+                return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
+            }
+
+            function loadJournal() {
+                try {
+                    const storedJournal = localStorage.getItem(JOURNAL_STORAGE_KEY);
+                    journalEntries = storedJournal ? JSON.parse(storedJournal) : [];
+                    if (!Array.isArray(journalEntries)) journalEntries = [];
+                } catch (error) {
+                    console.error("Erreur chargement journal:", error); journalEntries = [];
+                    showToast("Erreur de chargement du journal.", true);
+                }
+            }
+
+            function saveJournal() {
+                try { localStorage.setItem(JOURNAL_STORAGE_KEY, JSON.stringify(journalEntries)); }
+                catch (error) { console.error("Erreur sauvegarde journal:", error); showToast("Erreur de sauvegarde du journal.", true); }
+            }
+
+            function updateUIBasedOnRole(role) {
+                if (!role) { // Aucun rôle sélectionné
+                    roleSelectionContainer.style.display = "flex"; // Affiche la sélection de rôle
+                    mainAppContent.style.display = "none"; // Cache le contenu de l'app
+                    return;
+                }
+
+                roleSelectionContainer.style.display = "none"; // Cache la sélection de rôle
+                mainAppContent.style.display = "block";    // Affiche le contenu de l'app
+
+                formSection.classList.toggle("hidden", role !== "patient");
+                const showDataSections = journalEntries.length > 0;
+                chartSection.classList.toggle("hidden", !showDataSections);
+                historySection.classList.toggle("hidden", !showDataSections);
+
+                loadHistory();
+                updateChart();
+            }
+
+
+            roleSelect.addEventListener("change", () => {
+                updateUIBasedOnRole(roleSelect.value);
+            });
+
+            form.addEventListener("submit", (e) => {
+                e.preventDefault();
+                const entry = {
+                    id: Date.now(), date: document.getElementById("date").value,
+                    symptomes: document.getElementById("symptomes").value,
+                    douleur: parseInt(document.getElementById("douleur").value) || 0,
+                    tension: document.getElementById("tension").value,
+                    sommeil: document.getElementById("sommeil").value,
+                    humeur: document.getElementById("humeur").value,
+                    temperature: parseFloat(document.getElementById("temperature").value) || 0,
+                    frequence: parseInt(document.getElementById("frequence").value) || 0,
+                    appetit: document.getElementById("appetit").value,
+                    remarques: document.getElementById("remarques").value
+                };
+                if (!entry.date) { showToast("Veuillez sélectionner une date.", true); return; }
+                journalEntries.push(entry);
+                saveJournal();
+                form.reset();
+                showToast("Entrée enregistrée!", false, true);
+                loadHistory(); updateChart();
+                chartSection.classList.remove("hidden"); historySection.classList.remove("hidden");
+            });
+
+            function loadHistory() {
+                const keyword = searchInput.value.toLowerCase();
+                historyList.innerHTML = "";
+                const displayedEntries = journalEntries
+                    .filter(entry =>
+                        (entry.symptomes && entry.symptomes.toLowerCase().includes(keyword)) ||
+                        (entry.humeur && entry.humeur.toLowerCase().includes(keyword)) ||
+                        (entry.date && entry.date.includes(keyword))
+                    )
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (displayedEntries.length === 0) {
+                    historyList.innerHTML = `<p style="text-align:center; color: var(--secondary-color);">Aucune entrée ${keyword ? 'correspondante' : 'dans l\'historique'}.</p>`;
+                    return;
+                }
+                displayedEntries.forEach(entry => {
+                    const div = document.createElement("div");
+                    div.className = "entry"; div.dataset.entryId = entry.id;
+                    div.innerHTML = `
+                        <p class="date"><strong>Date :</strong> ${escapeHTML(new Date(entry.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' }))}</p>
+                        <div class="details">
+                            ${entry.symptomes ? `<strong>Symptômes :</strong> ${escapeHTML(entry.symptomes)}<br>` : ''}
+                            <strong>Douleur :</strong> ${escapeHTML(entry.douleur)} / 10<br>
+                            ${entry.tension ? `<strong>Tension :</strong> ${escapeHTML(entry.tension)}<br>` : ''}
+                            ${entry.temperature ? `<strong>Température :</strong> ${escapeHTML(entry.temperature)} °C<br>` : ''}
+                            ${entry.frequence ? `<strong>Fréquence cardiaque :</strong> ${escapeHTML(entry.frequence)} bpm<br>` : ''}
+                            ${entry.sommeil ? `<strong>Sommeil :</strong> ${escapeHTML(entry.sommeil)}<br>` : ''}
+                            ${entry.appetit ? `<strong>Appétit :</strong> ${escapeHTML(entry.appetit)}<br>` : ''}
+                            ${entry.humeur ? `<strong>Humeur :</strong> ${escapeHTML(entry.humeur)}<br>` : ''}
+                            ${entry.remarques ? `<strong>Remarques :</strong> ${escapeHTML(entry.remarques)}` : '<strong>Remarques :</strong> Aucune'}
+                        </div>
+                        <button class="delete-btn" data-id="${entry.id}"><i class="fas fa-trash-alt"></i> Supprimer</button>`;
+                    historyList.appendChild(div);
+                });
+            }
+
+            historyList.addEventListener('click', function(e) {
+                const deleteButton = e.target.closest('.delete-btn');
+                if (deleteButton) {
+                    const entryId = parseInt(deleteButton.dataset.id);
+                    if (!isNaN(entryId)) deleteEntry(entryId);
+                }
+            });
+
+            function deleteEntry(idToDelete) {
+                 if (confirm("Êtes-vous sûr de vouloir supprimer cette entrée ?")) {
+                    journalEntries = journalEntries.filter(entry => entry.id !== idToDelete);
+                    saveJournal(); showToast("Entrée supprimée.", false, true);
+                    loadHistory(); updateChart();
+                    if (journalEntries.length === 0) {
+                        chartSection.classList.add("hidden"); historySection.classList.add("hidden");
+                    }
+                 }
+            }
+
+            function parseTension(tensionStr) {
+                if (!tensionStr || typeof tensionStr !== 'string') return null; // Retourne null pour ne pas tracer 0 par erreur
+                const match = tensionStr.match(/^(\d+)/);
+                return match ? parseInt(match[1]) : null;
+            }
+
+            function updateChart() {
+                const sortedEntries = [...journalEntries].sort((a, b) => new Date(a.date) - new Date(b.date));
+                const labels = sortedEntries.map(e => new Date(e.date).toLocaleDateString('fr-FR', { day: '2-digit', month: 'short' }));
+                const datasets = [
+                    { label: "Douleur (/10)", data: sortedEntries.map(e => e.douleur), borderColor: "#ef4444", backgroundColor: "#ef444433", yAxisID: 'y', tension: 0.1, fill: false },
+                    { label: "Fréq. card. (bpm)", data: sortedEntries.map(e => e.frequence || null), borderColor: "#22c55e", backgroundColor: "#22c55e33", yAxisID: 'y1', tension: 0.1, fill: false },
+                    { label: "Temp. (°C)", data: sortedEntries.map(e => e.temperature || null), borderColor: "#3b82f6", backgroundColor: "#3b82f633", yAxisID: 'y2', tension: 0.1, fill: false },
+                    { label: "Tension syst. (mmHg)", data: sortedEntries.map(e => parseTension(e.tension)), borderColor: "#8b5cf6", backgroundColor: "#8b5cf633", yAxisID: 'y1', tension: 0.1, fill: false }
+                ].filter(ds => ds.data.some(val => val !== null && val !== 0)); // Ne pas afficher les datasets vides ou que des 0
+
+
+                if (chartInstance) chartInstance.destroy();
+                if (datasets.length === 0 && sortedEntries.length > 0) { // Si des entrées existent mais pas de données pour le graph
+                    document.getElementById("painChart").style.display = 'none'; // Cache le canvas
+                    // Optionnellement, afficher un message à la place du canvas
+                    return;
+                } else {
+                    document.getElementById("painChart").style.display = 'block';
+                }
+
+                chartInstance = new Chart(document.getElementById("painChart"), {
+                    type: "line", data: { labels, datasets },
+                    options: {
+                        responsive: true, maintainAspectRatio: false,
+                        plugins: { legend: { position: 'top' }, tooltip: { mode: 'index', intersect: false } },
+                        interaction: { mode: 'nearest', axis: 'x', intersect: false },
+                        scales: { // Configuration dynamique des axes basée sur les datasets présents
+                            y:  datasets.find(ds => ds.yAxisID === 'y') ? { type: 'linear', display: true, position: 'left', beginAtZero: true, title: { display: true, text: 'Douleur (/10)' } } : {display: false},
+                            y1: datasets.find(ds => ds.yAxisID === 'y1')? { type: 'linear', display: true, position: 'right', title: { display: true, text: 'BPM / mmHg' }, grid: { drawOnChartArea: false } } : {display: false},
+                            y2: datasets.find(ds => ds.yAxisID === 'y2')? { type: 'linear', display: true, position: 'right', title: { display: true, text: 'Température (°C)'}, suggestedMin: 35, suggestedMax: 42, grid: { drawOnChartArea: false }, offset: true } : {display: false},
+                            x:  { title: { display: true, text: 'Date' } }
+                        }
+                    }
+                });
+            }
+
+            searchInput.addEventListener("input", function() { loadHistory(); });
+
+            downloadChartBtn.addEventListener("click", function () {
+                if (!chartInstance || !chartInstance.canvas || journalEntries.length === 0) { showToast("Aucun graphique à exporter.", true); return; }
+                try {
+                    const link = document.createElement("a");
+                    link.download = "MediCare_Graphique_Suivi.png";
+                    link.href = chartInstance.toBase64Image('image/png', 1.0); // Qualité max
+                    link.click();
+                    showToast("Graphique exporté en PNG.", false, true);
+                } catch(e) { showToast("Erreur export graphique.", true); console.error("Erreur export graphique:", e); }
+            });
+
+            downloadPdfBtn.addEventListener("click", function () {
+                if (journalEntries.length === 0) { showToast("Aucune donnée de journal à exporter.", true); return; }
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const margin = 15; const maxLineWidth = pageWidth - margin * 2; let y = 20;
+
+                doc.setFontSize(18); doc.setTextColor(40,40,40); doc.text("Dossier Journalier - MediCare+", margin, y);
+                y += 8; doc.setLineWidth(0.4); doc.line(margin, y, pageWidth - margin, y); y += 10;
+                doc.setFontSize(10); doc.setTextColor(70,70,70);
+
+                const sortedEntriesForPdf = [...journalEntries].sort((a,b) => new Date(b.date) - new Date(a.date));
+                sortedEntriesForPdf.forEach((entry, index) => {
+                    if (y > doc.internal.pageSize.getHeight() - 30) {
+                        doc.addPage(); y = 20;
+                        doc.setFontSize(18); doc.setTextColor(40,40,40); doc.text("Dossier Journalier - MediCare+", margin, y);
+                        y += 8; doc.setLineWidth(0.4); doc.line(margin, y, pageWidth - margin, y); y += 10;
+                        doc.setFontSize(10); doc.setTextColor(70,70,70);
+                    }
+                    const entryDate = new Date(entry.date).toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+                    doc.setFont(undefined, 'bold'); doc.text(`Date: ${entryDate}`, margin, y); y += 6;
+                    doc.setFont(undefined, 'normal');
+                    function addDetail(label, value) {
+                        if (value || value === 0) {
+                            const text = `${label}: ${escapeHTML(String(value))}`;
+                            const splitText = doc.splitTextToSize(text, maxLineWidth - 5);
+                            doc.text(splitText, margin + 5, y); y += (splitText.length * 4.5);
+                        }
+                    }
+                    addDetail("Symptômes", entry.symptomes); addDetail("Douleur", `${entry.douleur} / 10`);
+                    addDetail("Tension", entry.tension); addDetail("Température", `${entry.temperature} °C`);
+                    addDetail("Fréq. cardiaque", `${entry.frequence} bpm`); addDetail("Sommeil", entry.sommeil);
+                    addDetail("Appétit", entry.appetit); addDetail("Humeur", entry.humeur);
+                    addDetail("Remarques", entry.remarques || "Aucune");
+                    y += 8;
+                    if (index < sortedEntriesForPdf.length - 1) { doc.setDrawColor(220,220,220); doc.line(margin, y - 4, pageWidth - margin, y - 4); }
+                });
+                try { doc.save(`dossier_journalier_medicare.pdf`); showToast("PDF du journal généré!", false, true); }
+                catch(e) { showToast("Erreur export PDF.", true); console.error("Erreur export PDF:", e); }
+            });
+
+            // Initialisation
+            loadJournal();
+            updateUIBasedOnRole(roleSelect.value); // État initial basé sur la sélection (vide par défaut)
+
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>

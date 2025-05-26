@@ -1,0 +1,2108 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medicare+ - Votre Santé Simplifiée</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* Styles généraux */
+    :root {
+      --primary-color: #069677; /* Vert Medicare */
+      --secondary-color: #0c3b6d; /* Bleu foncé */
+      --light-bg: #f8f9fa;
+      --text-dark: #333;
+      --text-light: #555;
+      --white: #ffffff;
+      --grey-border: #ddd;
+      --box-shadow: 0 6px 15px rgba(0,0,0,0.07);
+      --box-shadow-hover: 0 10px 25px rgba(0,0,0,0.12);
+      --red-highlight: #FF0000; 
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
+      background: var(--white);
+      color: var(--text-dark);
+      scroll-behavior: smooth;
+      line-height: 1.6;
+    }
+
+    h1, h2, h3 {
+      color: var(--secondary-color);
+      font-weight: 600;
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 2.2rem;
+      margin-bottom: 2.5rem;
+      position: relative;
+      padding-bottom: 0.5rem;
+    }
+    h2::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 3px;
+        background-color: var(--primary-color);
+        border-radius: 2px;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .section {
+        padding: 4rem 0;
+        opacity: 0;
+        transform: translateY(30px);
+        transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+        overflow: hidden;
+    }
+
+    .section.visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    .section:target, .section.no-js-visible {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .cta-button {
+      padding: 0.8rem 1.8rem;
+      background-color: var(--primary-color);
+      color: var(--white);
+      border: none;
+      border-radius: 30px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+      display: inline-block;
+      text-decoration: none;
+      box-shadow: 0 4px 10px rgba(6, 150, 119, 0.3);
+    }
+
+    .cta-button:hover, .cta-button:focus {
+      background-color: #057a63;
+      transform: translateY(-3px) scale(1.03);
+      box-shadow: 0 7px 15px rgba(6, 150, 119, 0.4);
+      outline: none;
+    }
+
+    /* ===== Header & Navigation ===== */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.97);
+      backdrop-filter: blur(8px);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 2rem;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      z-index: 1000;
+      transition: padding 0.3s ease;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #a81313;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      text-decoration: none;
+    }
+     .logo .fa-heartbeat {
+        font-size: 1.4rem;
+     }
+
+    nav {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    nav a:not(.lang-link) {
+      text-decoration: none;
+      color: var(--text-dark);
+      font-weight: 500;
+      position: relative;
+      padding: 0.3rem 0;
+    }
+
+    nav a:not(.lang-link)::after {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 2px;
+      bottom: 0;
+      left: 0;
+      background: var(--primary-color);
+      transition: width 0.3s ease;
+    }
+
+    nav a:not(.lang-link):hover::after, nav a:not(.lang-link).active::after {
+      width: 100%;
+    }
+
+    .lang-switcher {
+        border-left: 1px solid var(--grey-border);
+        padding-left: 1.5rem;
+        display: flex;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .lang-link {
+        color: var(--text-light);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.2rem 0.4rem;
+        border-radius: 4px;
+        transition: background-color 0.3s, color 0.3s;
+        cursor: pointer; 
+    }
+    .lang-link.active, .lang-link:hover {
+        color: var(--primary-color);
+        background-color: #eaf6f4;
+    }
+    .lang-switcher .fas {
+        color: var(--secondary-color);
+        font-size: 1.1rem;
+        margin-right: 0.3rem;
+    }
+
+    .burger-menu {
+      display: none;
+      font-size: 1.5rem;
+      background: none;
+      border: none;
+      color: var(--secondary-color);
+      cursor: pointer;
+    }
+
+    /* ===== Hero Section ===== */
+    .hero {
+      margin-top: 80px;
+      padding: 5rem 0;
+      background: linear-gradient(135deg, #eaf6f4 0%, var(--white) 100%);
+      position: relative;
+      overflow: hidden;
+      min-height: calc(100vh - 80px);
+      display: flex;
+      align-items: center;
+      text-align: center;
+    }
+    .hero-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 3rem;
+      position: relative;
+      z-index: 2;
+      animation: fadeInUp 1s ease both;
+    }
+    .hero-text {
+      flex: 1;
+      min-width: 300px;
+      text-align: left;
+      animation: slideInLeft 1.2s ease both;
+    }
+    .hero-text h1 {
+      font-size: 2.8rem;
+      line-height: 1.3;
+      margin-bottom: 1rem;
+      font-weight: 700;
+    }
+    .hero-text h1 span { color: var(--primary-color); }
+    .hero-subtitle {
+      font-size: 1.4rem;
+      color: var(--text-light);
+      margin-bottom: 1.5rem;
+      font-weight: 300;
+    }
+    .description-site {
+      font-size: 1.1rem;
+      color: var(--text-light);
+      margin-bottom: 2.5rem;
+    }
+     .description-site strong, .description-site em { color: var(--secondary-color); }
+    .hero-image {
+      flex: 1;
+      min-width: 300px;
+      text-align: center;
+      animation: zoomIn 1.2s ease both;
+    }
+    .hero-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 15px;
+    }
+    .bubbles {
+      position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+      overflow: hidden; z-index: 0; pointer-events: none;
+    }
+    .bubbles li {
+      position: absolute; display: block; list-style: none; width: 20px; height: 20px;
+      background: rgba(2, 11, 90, 0.377); animation: bubble 25s linear infinite;
+      bottom: -150px; border-radius: 50%;
+    }
+    .bubbles li:nth-child(1){ left: 25%; width: 80px; height: 80px; animation-delay: 0s; }
+    .bubbles li:nth-child(2) { left: 15%; width: 20px; height: 20px; animation-delay: 2s; animation-duration: 12s; }
+    .bubbles li:nth-child(3) { left: 70%; width: 20px; height: 20px; animation-delay: 4s; }
+    .bubbles li:nth-child(4) { left: 40%; width: 60px; height: 60px; animation-delay: 0s; animation-duration: 18s; }
+    .bubbles li:nth-child(5) { left: 65%; width: 30px; height: 30px; animation-delay: 0s; }
+    .bubbles li:nth-child(6) { left: 75%; width: 110px; height: 110px; animation-delay: 3s; background: rgba(22, 255, 205, 0.849); }
+    .bubbles li:nth-child(7) { left: 35%; width: 150px; height: 150px; animation-delay: 7s; background: rgba(59, 179, 153, 0.589);}
+    .bubbles li:nth-child(8) { left: 50%; width: 25px; height: 25px; animation-delay: 15s; animation-duration: 45s; }
+    .bubbles li:nth-child(9) { left: 20%; width: 15px; height: 15px; animation-delay: 2s; animation-duration: 35s; }
+    .bubbles li:nth-child(10) { left: 85%; width: 150px; height: 150px; animation-delay: 0s; animation-duration: 11s; background: rgba(6, 150, 119, 0.1);}
+    @keyframes bubble {
+      0% { transform: translateY(0) scale(1); opacity: 0.5; }
+      100% { transform: translateY(-100vh) scale(1.2); opacity: 0; }
+    }
+
+    /* ===== Section Fonctionnalités ===== */
+    #fonctionnalites { background-color: var(--light-bg); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+      margin-top: 3rem;
+    }
+    .feature {
+      background: var(--white);
+      padding: 2rem 1.5rem;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: var(--box-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+    }
+    .feature:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    .feature i {
+      font-size: 2.8rem;
+      color: var(--primary-color);
+      margin-bottom: 1.2rem;
+      transition: transform 0.4s ease;
+      display: inline-block;
+    }
+    .feature:hover i { transform: scale(1.15) rotate(5deg); }
+    .feature h3 {
+      margin-bottom: 0.8rem;
+      font-size: 1.3rem;
+    }
+     .feature p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+     }
+
+    /* ===== Section Comment ça marche ===== */
+    #comment-ca-marche { padding-bottom: 5rem; }
+    .how-it-works-intro {
+        text-align: center;
+        max-width: 700px;
+        margin: 0 auto 3rem auto;
+        color: var(--text-light);
+        font-size: 1.1rem;
+    }
+    .timeline {
+      position: relative;
+      margin: 4rem auto;
+      padding: 0 1rem;
+      max-width: 900px;
+    }
+     .timeline::before {
+        content: '';
+        position: absolute;
+        top: 10px;
+        bottom: 10px;
+        left: 40px;
+        width: 4px;
+        background-color: #eaf6f4;
+        border-radius: 2px;
+        z-index: 1;
+     }
+    .timeline-item {
+      position: relative;
+      margin-bottom: 3rem;
+      padding-left: 80px;
+      z-index: 2;
+      min-height: 60px;
+      opacity: 0;
+      transform: translateX(-30px);
+      transition: opacity 0.6s ease-out, transform 0.6s ease-out;
+    }
+     .timeline-item.visible {
+        opacity: 1;
+        transform: translateX(0);
+     }
+     .timeline-item::before {
+        content: attr(data-step);
+        position: absolute;
+        left: 15px;
+        top: 0;
+        width: 50px;
+        height: 50px;
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border: 4px solid var(--white);
+        box-shadow: 0 0 0 4px var(--primary-color);
+        z-index: 3;
+     }
+    .timeline-content {
+      background-color: var(--white);
+      padding: 1.5rem;
+      border-radius: 10px;
+      box-shadow: var(--box-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+    }
+     .timeline-content::before {
+        content: '';
+        position: absolute;
+        top: 18px;
+        left: -10px;
+        width: 0;
+        height: 0;
+        border-style: solid;
+        border-width: 10px 10px 10px 0;
+        border-color: transparent var(--white) transparent transparent;
+     }
+    .timeline-content:hover {
+      transform: translateX(5px);
+      box-shadow: var(--box-shadow-hover);
+    }
+    .timeline-content h3 {
+      margin-top: 0;
+      font-size: 1.3rem;
+      color: var(--primary-color);
+    }
+    .timeline-content p {
+      color: var(--text-light);
+      margin: 0.5rem 0 0;
+      font-size: 0.95rem;
+    }
+
+    /* ===== Section Témoignages & Statistiques ===== */
+    #temoignages-stats { background-color: var(--light-bg); }
+    .testimonial-carousel-wrapper {
+        position: relative;
+        max-width: 700px; 
+        margin: 3rem auto 0;
+        overflow: hidden; 
+    }
+    .testimonial-carousel {
+        display: flex; 
+        transition: transform 0.5s ease-in-out; 
+    }
+    .testimonial-card {
+        background: var(--white);
+        border-left: 5px solid var(--primary-color);
+        border-radius: 10px;
+        padding: 1.5rem;
+        box-shadow: var(--box-shadow);
+        flex: 0 0 100%; 
+        box-sizing: border-box; 
+        opacity: 0.7; 
+        transform: scale(0.98); 
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        display: flex;
+        flex-direction: column;
+        min-height: 180px; 
+    }
+    .testimonial-card.active-slide {
+        opacity: 1;
+        transform: scale(1);
+    }
+     .testimonial-card p {
+        font-style: italic;
+        color: var(--text-light);
+        margin-bottom: 1rem;
+        flex-grow: 1;
+        font-size: 1rem;
+     }
+    .testimonial-card .author {
+        margin-top: auto;
+        font-weight: 600;
+        color: var(--secondary-color);
+        text-align: right;
+        font-size: 0.9rem;
+    }
+    .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0,0,0,0.3);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1.2rem;
+        cursor: pointer;
+        z-index: 10;
+        transition: background-color 0.3s ease;
+    }
+    .carousel-btn:hover {
+        background-color: rgba(0,0,0,0.6);
+    }
+    .carousel-btn.prev { left: 10px; }
+    .carousel-btn.next { right: 10px; }
+    .carousel-dots {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+    .carousel-dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        background-color: var(--grey-border);
+        border-radius: 50%;
+        margin: 0 5px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+    .carousel-dot.active {
+        background-color: var(--primary-color);
+    }
+
+    .stats-section {
+        margin-top: 4rem;
+        padding: 2.5rem 0;
+        background-color: var(--secondary-color);
+        color: var(--white);
+    }
+     .stats-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-around;
+        gap: 2rem;
+        text-align: center;
+     }
+     .stat-item {
+        flex: 1 1 200px;
+        animation: fadeIn 1s ease both;
+     }
+     .stat-item i {
+        font-size: 2.5rem;
+        margin-bottom: 0.8rem;
+        color: var(--primary-color);
+     }
+     .stat-item .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        display: block;
+        margin-bottom: 0.3rem;
+     }
+     .stat-item .stat-label {
+        font-size: 1rem;
+        opacity: 0.9;
+     }
+
+    /* ===== Section Blog ===== */
+     #blog { background-color: var(--white); } /* Changé pour fond blanc pour contraste avec modale si ouverte */
+     .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2.5rem;
+        margin-top: 3rem;
+    }
+     .blog-card {
+        background: var(--light-bg); /* Léger fond pour les cartes */
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: var(--box-shadow);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+     .blog-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--box-shadow-hover);
+     }
+     .blog-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        display: block;
+     }
+     .blog-content {
+        padding: 1.5rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+     }
+     .blog-content h3 {
+        font-size: 1.3rem;
+        margin-top: 0;
+        margin-bottom: 0.8rem;
+     }
+     .blog-content p {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+     }
+     .blog-content .read-more-btn {
+        align-self: flex-start;
+        text-decoration: none;
+        color: var(--primary-color);
+        font-weight: 600;
+        transition: color 0.3s;
+        cursor: pointer; 
+     }
+     .blog-content .read-more-btn:hover {
+        color: var(--secondary-color);
+     }
+      .blog-content .read-more-btn i {
+         margin-left: 0.3rem;
+         transition: transform 0.3s;
+      }
+       .blog-content .read-more-btn:hover i {
+          transform: translateX(4px);
+       }
+
+    /* ===== MODAL STYLES (pour Blog) ===== */
+    .modal {
+        position: fixed;
+        z-index: 2000; 
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        overflow: auto;
+        background-color: rgba(0,0,0,0.7); 
+        display: flex; 
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0s linear 0.3s;
+    }
+    .modal.open {
+        opacity: 1;
+        visibility: visible;
+        transition: opacity 0.3s ease, visibility 0s linear 0s;
+    }
+    .modal-content {
+        background-color: var(--white);
+        margin: auto;
+        padding: 25px;
+        border-radius: 10px;
+        width: 90%;
+        max-width: 700px;
+        max-height: 85vh; 
+        overflow-y: auto; 
+        position: relative;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        transform: scale(0.95);
+        transition: transform 0.3s ease-out;
+    }
+    .modal.open .modal-content {
+        transform: scale(1);
+    }
+    .close-modal-btn {
+        color: #aaa;
+        position: absolute;
+        top: 15px;
+        right: 20px;
+        font-size: 28px;
+        font-weight: bold;
+        cursor: pointer;
+        line-height: 1;
+    }
+    .close-modal-btn:hover,
+    .close-modal-btn:focus {
+        color: var(--text-dark);
+        text-decoration: none;
+    }
+    #modal-blog-image {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 1rem;
+    }
+    #modal-blog-title {
+        font-size: 1.8rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    #modal-blog-author-date {
+        font-size: 0.85rem;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        border-bottom: 1px solid var(--grey-border);
+        padding-bottom: 0.75rem;
+    }
+    #modal-blog-fulltext {
+        font-size: 1rem;
+        line-height: 1.7;
+        color: var(--text-dark);
+    }
+    #modal-blog-fulltext p, #modal-blog-fulltext ol, #modal-blog-fulltext ul {
+        margin-bottom: 1em;
+    }
+    #modal-blog-fulltext ol, #modal-blog-fulltext ul {
+        padding-left: 1.5em;
+    }
+
+    /* ===== Section FAQ ===== */
+    #faq {
+        background-color: var(--light-bg);
+    }
+    .faq-list {
+        max-width: 800px;
+        margin: 2rem auto 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    .faq-item {
+        background-color: var(--white);
+        border-radius: 8px;
+        box-shadow: var(--box-shadow);
+        overflow: hidden; 
+    }
+    .faq-question {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 1rem 1.5rem;
+        background: none;
+        border: none;
+        font-family: 'Poppins', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 500;
+        color: var(--secondary-color);
+        text-align: left;
+        cursor: pointer;
+    }
+    .faq-question i {
+        transition: transform 0.3s ease;
+        color: var(--primary-color);
+        font-size: 0.9em;
+    }
+    .faq-question[aria-expanded="true"] i {
+        transform: rotate(180deg);
+    }
+    .faq-answer {
+        padding: 0 1.5rem; 
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+                    padding-top 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+                    padding-bottom 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+        color: var(--text-light);
+        font-size: 0.95rem;
+        line-height: 1.6;
+    }
+    .faq-answer p { margin: 0; }
+    .faq-item.open .faq-answer {
+        padding-top: 0.5rem; 
+        padding-bottom: 1.5rem; 
+    }
+
+    /* ===== Section Partenaires ===== */
+    #partenaires { background-color: var(--light-bg); }
+     .partners-logos {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        align-items: center;
+        gap: 3rem;
+        margin-top: 3rem;
+        transition: filter 0.4s ease, opacity 0.4s ease;
+    }
+    .partners-logos img:not(.medicare-plus-partner-logo) {
+        filter: grayscale(100%);
+        opacity: 0.7;
+    }
+    .partners-logos:hover img:not(.medicare-plus-partner-logo) {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
+     .partners-logos img {
+        max-height: 60px;
+        max-width: 150px;
+        object-fit: contain;
+        transition: transform 0.3s ease; 
+     }
+     .medicare-plus-partner-logo {
+        filter: none !important; 
+        opacity: 1 !important;   
+        transform: scale(1.1); 
+     }
+     .partners-logos img:hover {
+        transform: scale(1.05); 
+     }
+
+    /* ===== Section Notifications Teaser ===== */
+    #notifications-teaser {
+        background-color: var(--secondary-color);
+        color: var(--white);
+        padding: 2.5rem 0;
+        text-align: center;
+    }
+     .notification-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1.5rem;
+        flex-wrap: wrap;
+     }
+     .notification-content i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        animation: ringBell 1.5s ease-in-out infinite;
+     }
+     .notification-content p {
+        font-size: 1.2rem;
+        margin: 0;
+        max-width: 400px;
+     }
+     @keyframes ringBell {
+        0%, 100% { transform: rotate(0); }
+        10%, 30%, 50%, 70%, 90% { transform: rotate(-10deg); }
+        20%, 40%, 60%, 80% { transform: rotate(10deg); }
+     }
+
+    /* ===== Section Témoignage Vidéo (Implémentation YouTube) ===== */
+    #video-temoignage {
+        text-align: center;
+        background: linear-gradient(to bottom, #eaf6f4 0%, var(--white) 100%);
+    }
+    .video-wrapper { 
+        position: relative;
+        padding-bottom: 56.25%; 
+        height: 0;
+        overflow: hidden;
+        max-width: 800px;
+        margin: 2rem auto 0 auto;
+        border-radius: 15px;
+        box-shadow: var(--box-shadow);
+    }
+    .video-wrapper iframe {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 15px; 
+    }
+
+    /* ===== Section Contact (Styles existants améliorés) ===== */
+    .contact-section {
+      padding: 4rem 0;
+      background: linear-gradient(135deg, #f4f4f9, #e6ecf5);
+      font-family: 'Poppins', sans-serif;
+      border-top: 1px solid var(--grey-border);
+    }
+    .contact-section h2 { margin-bottom: 3rem; }
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 3rem;
+      align-items: flex-start;
+    }
+    .contact-info,
+    .contact-form-wrapper {
+      background-color: var(--white);
+      padding: 2.5rem;
+      border-radius: 15px;
+      box-shadow: var(--box-shadow);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .contact-info:hover,
+    .contact-form-wrapper:hover {
+      transform: translateY(-8px);
+      box-shadow: var(--box-shadow-hover);
+    }
+     .contact-info h3, .contact-form-wrapper h3 {
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
+     }
+    .contact-info p {
+      margin: 1rem 0;
+      font-size: 1rem;
+      color: var(--text-light);
+      display: flex;
+      align-items: center;
+      gap: 0.8rem;
+    }
+     .contact-info p i {
+        color: var(--primary-color);
+        font-size: 1.2rem;
+        width: 20px;
+        text-align: center;
+     }
+    .contact-info a {
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+    .contact-info a:hover { color: var(--primary-color); }
+    .contact-form label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+    .contact-form input,
+    .contact-form select,
+    .contact-form textarea {
+      width: 100%;
+      padding: 0.8rem 1rem;
+      margin-bottom: 1.2rem;
+      border: 1px solid var(--grey-border);
+      border-radius: 8px;
+      transition: border-color 0.3s, box-shadow 0.3s;
+      font-size: 1rem;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+    .contact-form input:focus,
+    .contact-form select:focus,
+    .contact-form textarea:focus {
+      border-color: var(--primary-color);
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(6, 150, 119, 0.2);
+    }
+     .contact-form textarea {
+        min-height: 120px;
+        resize: vertical;
+     }
+    .contact-form .btn-submit {
+       background-color: var(--primary-color);
+        color: white;
+        padding: 0.8rem 2rem;
+        border: none;
+        border-radius: 8px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
+        display: inline-block;
+    }
+    .contact-form .btn-submit:hover {
+       background-color: #057a63;
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(6, 150, 119, 0.3);
+    }
+     .form-feedback {
+        color: green;
+        text-align: center;
+        font-size: 1rem;
+        margin-top: 1rem;
+        font-weight: 500;
+        height: 1.5em;
+     }
+    .map-container {
+      margin-top: 1.5rem;
+      height: 250px;
+      overflow: hidden;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    .map-container iframe {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+
+    /* ===== Footer ===== */
+    footer {
+      background-color: var(--secondary-color);
+      color: rgba(255, 255, 255, 0.8);
+      padding: 4rem 0 2rem 0;
+      font-size: 0.95rem;
+    }
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2.5rem;
+      margin-bottom: 3rem;
+    }
+    .footer-column h4 {
+       color: var(--white);
+        font-size: 1.2rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        padding-bottom: 0.5rem;
+        font-weight: 600;
+    }
+     .footer-column h4::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 40px;
+        height: 2px;
+        background-color: var(--primary-color);
+     }
+    .footer-logo .logo {
+       font-size: 1.8rem;
+       color: #a81313;
+       margin-bottom: 1rem;
+       display: inline-block;
+    }
+     .footer-logo .logo .fa-heartbeat { font-size: 1.6rem; }
+     .footer-mission {
+        line-height: 1.7;
+        opacity: 0.9;
+     }
+    .footer-links ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .footer-links li { margin-bottom: 0.8rem; }
+    .footer-links a {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      transition: color 0.3s, padding-left 0.3s;
+      position: relative;
+    }
+    .footer-links a:hover {
+      color: var(--white);
+      padding-left: 8px;
+    }
+     .footer-links a:hover::before {
+        content: '\f0da';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        left: -5px;
+        color: var(--primary-color);
+     }
+     .footer-contact p {
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+     }
+      .footer-contact p i {
+         color: var(--primary-color);
+         width: 16px;
+      }
+      .footer-contact a {
+         color: rgba(255, 255, 255, 0.8);
+         text-decoration: none;
+         transition: color 0.3s;
+      }
+      .footer-contact a:hover { color: var(--white); }
+    .social-media { margin-top: 1rem; }
+    .social-icon {
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      margin-right: 1rem;
+      font-size: 1.4rem;
+      transition: color 0.3s, transform 0.3s;
+      display: inline-block;
+    }
+    .social-icon:hover {
+      color: var(--primary-color);
+      transform: scale(1.2);
+    }
+    .footer-bottom {
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      text-align: center;
+      padding-top: 2rem;
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+
+    /* ===== Bouton Back to Top ===== */
+    #btn-top {
+      display: none;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      z-index: 999;
+      font-size: 1.2rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      outline: none;
+      padding: 0.8rem;
+      width: 45px;
+      height: 45px;
+      line-height: 1;
+      border-radius: 50%;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      cursor: pointer;
+      transition: background-color 0.3s, transform 0.3s, opacity 0.3s;
+      opacity: 0.8;
+    }
+    #btn-top:hover {
+      background-color: #057a63;
+      transform: scale(1.1);
+      opacity: 1;
+    }
+
+    /* ===== Chatbot Styles ===== */
+    .chatbot-icon {
+       position: fixed;
+       bottom: 30px;
+       left: 30px;
+       background: var(--secondary-color);
+       border-radius: 50%;
+       padding: 1rem;
+       color: white;
+       cursor: pointer;
+       z-index: 1000;
+       animation: pulse 2s infinite;
+       box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+       font-size: 1.4rem;
+       width: 55px;
+       height: 55px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+    }
+     @keyframes pulse {
+       0% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+       50% { transform: scale(1.1); box-shadow: 0 6px 18px rgba(0,0,0,0.2); }
+       100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+     }
+     .chatbot-container {
+        display: none; 
+        position: fixed;
+        bottom: 100px;
+        left: 30px;
+        width: 320px;
+        max-width: 90%;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        flex-direction: column;
+        overflow: hidden;
+        z-index: 1001;
+        animation: fadeIn 0.4s ease;
+     }
+     .chatbot-header {
+        background: var(--secondary-color);
+        color: white;
+        padding: 0.8rem 1rem;
+        font-weight: 600;
+        text-align: left;
+        position: relative;
+        font-size: 1.1rem;
+    }
+    .chatbot-header .close-btn {
+        position: absolute;
+        top: 50%;
+        right: 1rem;
+        transform: translateY(-50%);
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: var(--white);
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s;
+    }
+    .chatbot-header .close-btn:hover { opacity: 1; }
+    .chatbot-body {
+        padding: 1rem;
+        height: 300px; 
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    .bot-message, .user-message {
+        padding: 0.6rem 1rem;
+        border-radius: 15px;
+        max-width: 85%; 
+        line-height: 1.4;
+        font-size: 0.95rem;
+        word-wrap: break-word;
+    }
+    .bot-message {
+        background-color: #e9e9eb;
+        color: var(--text-dark);
+        align-self: flex-start;
+        border-bottom-left-radius: 5px;
+    }
+    .bot-message.typing-message {
+        font-style: italic;
+        color: var(--text-light);
+        background-color: transparent;
+        padding: 0.2rem 0.5rem;
+    }
+    .user-message {
+        background-color: var(--primary-color);
+        color: var(--white);
+        align-self: flex-end;
+        border-bottom-right-radius: 5px;
+    }
+    .bot-message a { 
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+    .bot-message a:hover { color: var(--secondary-color); }
+    .bot-message ul, .bot-message ol {
+        margin: 0.5rem 0 0.5rem 1.2rem;
+        padding-left: 0.5rem;
+    }
+    .bot-message li { margin-bottom: 0.3rem; }
+    .chatbot-body .predefined-questions {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding: 0 0.5rem;
+    }
+    .chatbot-body .predefined-questions button {
+        background-color: var(--light-bg);
+        color: var(--secondary-color);
+        border: 1px solid var(--grey-border);
+        padding: 0.6rem 0.8rem;
+        border-radius: 20px;
+        cursor: pointer;
+        text-align: left;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        transition: background-color 0.3s, color 0.3s;
+        font-weight: 500;
+    }
+    .chatbot-body .predefined-questions button:hover {
+        background-color: var(--primary-color);
+        color: var(--white);
+        border-color: var(--primary-color);
+    }
+    .chatbot-footer {
+        display: flex;
+        padding: 0.75rem;
+        border-top: 1px solid var(--grey-border);
+        background-color: #f8f9fa;
+    }
+    .chatbot-footer input[type="text"] {
+        flex-grow: 1;
+        border: 1px solid var(--grey-border);
+        border-radius: 20px;
+        padding: 0.6rem 1rem;
+        font-family: 'Poppins', sans-serif;
+        font-size: 0.9rem;
+        margin-right: 0.5rem;
+        outline: none;
+    }
+    .chatbot-footer input[type="text"]:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 2px rgba(6, 150, 119, 0.2);
+    }
+    .chatbot-footer button {
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.3s;
+    }
+    .chatbot-footer button:hover { background-color: #057a63; }
+
+    /* ===== Responsive Design ===== */
+    @media (max-width: 992px) {
+        .container { padding: 0 1.5rem; }
+        .hero-text h1 { font-size: 2.5rem; }
+        .hero-subtitle { font-size: 1.2rem; }
+        .features-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .contact-grid { grid-template-columns: 1fr; }
+        .footer-content { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+        .testimonial-carousel-wrapper { max-width: 90%; }
+    }
+
+    @media (max-width: 768px) {
+        h2 { font-size: 1.8rem; margin-bottom: 2rem; }
+        .section { padding: 3rem 0; }
+        header { padding: 0.8rem 1rem; }
+        header nav {
+            display: flex; 
+            flex-direction: column;
+            position: absolute;
+            top: 100%; 
+            left: 0;
+            width: 100%;
+            background: var(--white);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+            align-items: center;
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            visibility: hidden;
+            padding-top: 0;
+            padding-bottom: 0;
+            gap: 0;
+            transition: max-height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        opacity 0.3s ease-in-out 0.1s,
+                        padding-top 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        padding-bottom 0.4s cubic-bezier(0.25, 0.1, 0.25, 1),
+                        gap 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+        header nav.mobile-active {
+            max-height: 70vh; 
+            opacity: 1;
+            visibility: visible;
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            gap: 1rem;
+        }
+        header nav a:not(.lang-link) {
+            margin: 0.5rem 0;
+            width: 100%;
+            text-align: center;
+        }
+        header nav .lang-switcher {
+            border-left: none;
+            padding-left: 0;
+            margin-top: 1rem;
+            flex-direction: row;
+            justify-content: center;
+        }
+        .burger-menu { display: block; }
+        .hero { margin-top: 70px; padding: 3rem 0; text-align: center; min-height: auto; }
+        .hero-wrapper { flex-direction: column-reverse; gap: 2rem; }
+        .hero-text { text-align: center; animation: none; }
+        .hero-text h1 { font-size: 2.2rem; }
+        .description-site { font-size: 1rem; margin-bottom: 1.5rem; }
+        .cta-button { width: 80%; max-width: 300px; }
+        .timeline::before { left: 25px; }
+        .timeline-item { padding-left: 60px; }
+        .timeline-item::before { left: 0; width: 40px; height: 40px; font-size: 1rem; border-width: 3px; box-shadow: 0 0 0 3px var(--primary-color); }
+        .timeline-content::before { display: none; }
+        
+        .testimonial-carousel-wrapper { overflow: visible; }
+        .testimonial-carousel {
+            flex-direction: column;
+            gap: 1.5rem;
+            transform: none !important; 
+        }
+        .testimonial-card {
+            flex: 1 1 auto; 
+            max-width: 90%;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 1; 
+            transform: scale(1); 
+        }
+        .carousel-btn, .carousel-dots { display: none; }
+
+        .stats-grid { flex-direction: column; gap: 1.5rem; }
+        .blog-grid { grid-template-columns: 1fr; }
+        .partners-logos { gap: 2rem; }
+        .partners-logos img { max-height: 45px; }
+        .footer-content { text-align: center; }
+        .footer-column h4::after { left: 50%; transform: translateX(-50%); }
+        .footer-links ul, .footer-contact, .social-media { text-align: center; }
+         .footer-contact p { justify-content: center; }
+        .social-icon { margin: 0 0.5rem; }
+        .chatbot-icon { bottom: 20px; left: 20px; }
+        .chatbot-container { left: 5%; bottom: 85px; width: 90%; }
+        .map-container { height: 200px; }
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes zoomIn {
+        from { opacity: 0; transform: scale(0.9); }
+        to { opacity: 1; transform: scale(1); }
+    }
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-50px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+     @keyframes fadeIn { 
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="{% url 'index' %}" class="logo"><i class="fas fa-heartbeat" aria-hidden="true"></i> Medicare+</a>
+    <nav role="navigation">
+      <a href="#hero" class="active" data-translate-key="nav_accueil">Accueil</a>
+      <a href="#fonctionnalites" data-translate-key="nav_fonctionnalites">Fonctionnalités</a>
+      <a href="#comment-ca-marche" data-translate-key="nav_comment_ca_marche">Comment ça marche</a>
+      <a href="#temoignages-stats" data-translate-key="nav_avis">Avis</a>
+      <a href="#blog" data-translate-key="nav_blog">Blog</a>
+      <a href="#faq" data-translate-key="nav_faq">FAQ</a>
+      <a href="#contact" data-translate-key="nav_contact">Contact</a>
+      <div class="lang-switcher">
+          <i class="fas fa-globe" aria-hidden="true"></i>
+          <span class="lang-link" data-lang="fr" aria-label="Version française">FR</span>
+          <span aria-hidden="true">|</span>
+          <span class="lang-link" data-lang="en" aria-label="English version">EN</span>
+      </div>
+    </nav>
+    <button class="burger-menu" aria-label="Ouvrir le menu" aria-expanded="false">
+      <i class="fas fa-bars"></i>
+    </button>
+  </header>
+
+  <main role="main">
+
+    <section id="hero" class="hero section">
+      <div class="container hero-wrapper">
+        <div class="hero-text">
+          <h1 data-translate-key="hero_title">Bienvenue sur <span>Medicare+</span></h1>
+          <p class="hero-subtitle" data-translate-key="hero_subtitle">Votre plateforme de santé connectée au quotidien</p>
+          <p class="description-site" data-translate-key="hero_description_site">
+            Gérez vos <strong>rendez-vous</strong>, suivez vos <strong>traitements</strong>, accédez à vos <strong>ordonnances</strong> et communiquez avec vos <strong>médecins</strong> facilement. Prenez le contrôle de votre santé.
+          </p>
+          <a href="{% url 'connexion' %}" class="cta-button" data-translate-key="hero_cta_button">Commencer maintenant</a>
+          </div>
+        <div class="hero-image">
+          <img src="https://iyada.ma/wp-content/uploads/2024/09/virage-numerique-en-sante-1024x683.jpg">
+        </div>
+      </div>
+      <ul class="bubbles" aria-hidden="true">
+        <li></li><li></li><li></li><li></li><li></li>
+        <li></li><li></li><li></li><li></li><li></li>
+      </ul>
+    </section>
+
+    <section id="fonctionnalites" class="section">
+      <div class="container">
+        <h2 data-translate-key="fonctionnalites_title">Nos Fonctionnalités Essentielles</h2>
+        <div class="features-grid">
+          <div class="feature">
+            <i class="fas fa-calendar-check" aria-hidden="true"></i>
+            <h3 data-translate-key="feature1_title">Rendez-vous médicaux</h3>
+            <p data-translate-key="feature1_desc">Planifiez et gérez vos consultations en ligne en quelques clics.</p>
+          </div>
+          <div class="feature">
+            <i class="fas fa-prescription-bottle-alt" aria-hidden="true"></i>
+            <h3 data-translate-key="feature2_title">Suivi des traitements</h3>
+            <p data-translate-key="feature2_desc">Accédez à vos ordonnances et suivez l'évolution de vos traitements.</p>
+          </div>
+          <div class="feature">
+            <i class="fas fa-bell"></i>
+            <h3 data-translate-key="feature3_title">Alertes</h3>
+            <p data-translate-key="feature3_desc">Recevez des notifications importantes liées à votre santé et vos soins.</p>
+          </div>
+          <div class="feature">
+            <i class="fas fa-notes-medical"></i>
+            <h3 data-translate-key="feature4_title">Journal de santé</h3>
+            <p data-translate-key="feature4_desc">Consignez vos symptômes, humeurs et antécédents médicaux facilement.</p>
+          </div>
+        </div>
+    </section>
+
+     <section id="comment-ca-marche" class="section">
+        <div class="container">
+            <h2 data-translate-key="comment_ca_marche_title">Comment ça marche ?</h2>
+            <p class="how-it-works-intro" data-translate-key="comment_ca_marche_intro">
+                Rejoindre Medicare+ et gérer votre santé n'a jamais été aussi simple. Suivez ces étapes rapides pour commencer :
+            </p>
+            <div class="timeline">
+                <div class="timeline-item" data-step="1">
+                    <div class="timeline-content">
+                        <h3 data-translate-key="step1_title">1. Inscription gratuite</h3>
+                        <p data-translate-key="step1_desc">Créez votre compte sécurisé en tant que patient, professionnel de santé ou pharmacien en quelques minutes.</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-step="2">
+                    <div class="timeline-content">
+                        <h3 data-translate-key="step2_title">2. Personnalisez votre espace</h3>
+                        <p data-translate-key="step2_desc">Complétez votre profil et configurez votre tableau de bord selon vos besoins médicaux.</p>
+                    </div>
+                </div>
+                <div class="timeline-item" data-step="3">
+                    <div class="timeline-content">
+                        <h3 data-translate-key="step3_title">3. Prenez rendez-vous</h3>
+                        <p data-translate-key="step3_desc">Trouvez un praticien et réservez une consultation en ligne.</p>
+                    </div>
+                </div>
+                 <div class="timeline-item" data-step="4">
+                    <div class="timeline-content">
+                        <h3 data-translate-key="step4_title">4. Suivez votre traitement</h3>
+                        <p data-translate-key="step4_desc">Gérez vos ordonnances et recevez des rappels utiles. Ne manquez plus aucun traitement ou rendez-vous grâce à nos alertes intelligentes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+     </section>
+
+    <section id="temoignages-stats" class="section">
+      <div class="container">
+        <h2 data-translate-key="temoignages_title">Ce que disent nos utilisateurs</h2>
+        <div class="testimonial-carousel-wrapper">
+            <div class="testimonial-carousel">
+              <div class="testimonial-card">
+                  <p data-translate-key="testimonial1_text">"Incroyablement pratique pour gérer mes rendez-vous et ceux de ma famille. Fini les oublis !"</p>
+                  <div class="author" data-translate-key="testimonial1_author">– Sarah L., Patiente</div>
+              </div>
+              <div class="testimonial-card">
+                  <p data-translate-key="testimonial2_text">"La messagerie sécurisée me permet d'échanger rapidement avec mes patients. Un vrai plus."</p>
+                  <div class="author" data-translate-key="testimonial2_author">– Dr. Karim B., Médecin Généraliste</div>
+              </div>
+              <div class="testimonial-card">
+                  <p data-translate-key="testimonial3_text">"Enfin une plateforme qui centralise tout ! Le suivi des traitements est beaucoup plus simple."</p>
+                  <div class="author" data-translate-key="testimonial3_author">– Marc D., Patient chronique</div>
+              </div>
+              <div class="testimonial-card">
+                  <p data-translate-key="testimonial4_text">"L'interface est intuitive et le support client est très réactif. Je recommande vivement Medicare+ !"</p>
+                  <div class="author" data-translate-key="testimonial4_author">– Amina K., Pharmacienne</div>
+              </div>
+            </div>
+            <button class="carousel-btn prev" aria-label="Témoignage précédent" data-translate-key-aria="carousel_prev_label"><i class="fas fa-chevron-left"></i></button>
+            <button class="carousel-btn next" aria-label="Témoignage suivant" data-translate-key-aria="carousel_next_label"><i class="fas fa-chevron-right"></i></button>
+            <div class="carousel-dots"></div>
+        </div>
+      </div>
+
+      <div class="stats-section section">
+        <div class="container stats-grid">
+            <div class="stat-item">
+                <i class="fas fa-users" aria-hidden="true"></i>
+                <span class="stat-number">1200+</span>
+                <span class="stat-label" data-translate-key="stat1_label">Patients suivis avec succès</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-user-md" aria-hidden="true"></i>
+                <span class="stat-number">150+</span>
+                <span class="stat-label" data-translate-key="stat2_label">Professionnels de santé partenaires</span>
+            </div>
+            <div class="stat-item">
+                <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                <span class="stat-number">100%</span>
+                <span class="stat-label" data-translate-key="stat3_label">Plateforme sécurisée et confidentielle</span>
+            </div>
+        </div>
+      </div>
+    </section>
+
+     <section id="blog" class="section">
+        <div class="container">
+            <h2 data-translate-key="blog_section_title">Nos derniers articles santé</h2>
+            <div class="blog-grid">
+                <article class="blog-card" id="blog-cardio">
+                    <img src="https://picsum.photos/seed/santeCardio/400/250" alt="Illustration sur la santé cardiovasculaire">
+                    <div class="blog-content">
+                        <h3 data-translate-key="blog_cardio_title">5 conseils pour améliorer votre santé cardiovasculaire</h3>
+                        <p data-translate-key="blog_cardio_summary">Découvrez des gestes simples à adopter au quotidien pour prendre soin de votre cœur...</p>
+                        <span class="read-more-btn" onclick="openBlogModal('cardio')" data-translate-key="blog_read_more">Lire plus <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                    </div>
+                </article>
+                <article class="blog-card" id="blog-stress">
+                    <img src="https://picsum.photos/seed/gestionStress/400/250" alt="Illustration sur la gestion du stress et la relaxation">
+                    <div class="blog-content">
+                        <h3 data-translate-key="blog_stress_title">Gestion du stress : Techniques de relaxation efficaces</h3>
+                        <p data-translate-key="blog_stress_summary">Le stress impacte votre santé. Apprenez des méthodes simples pour vous détendre...</p>
+                        <span class="read-more-btn" onclick="openBlogModal('stress')" data-translate-key="blog_read_more">Lire plus <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                    </div>
+                </article>
+                <article class="blog-card" id="blog-alimentation">
+                   <img src="https://picsum.photos/seed/alimentationSaine/400/250" alt="Illustration d'une assiette équilibrée">
+                    <div class="blog-content">
+                        <h3 data-translate-key="blog_alimentation_title">L'importance d'une alimentation équilibrée</h3>
+                        <p data-translate-key="blog_alimentation_summary">Pourquoi bien manger est crucial pour votre bien-être général et votre énergie...</p>
+                        <span class="read-more-btn" onclick="openBlogModal('alimentation')" data-translate-key="blog_read_more">Lire plus <i class="fas fa-arrow-right" aria-hidden="true"></i></span>
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <section id="faq" class="section">
+        <div class="container">
+            <h2 data-translate-key="faq_section_title">Questions Fréquemment Posées</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-1">
+                        <span data-translate-key="faq_q1_question">Comment puis-je m'inscrire sur Medicare+ ?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer" id="faq-answer-1" hidden>
+                        <p data-translate-key="faq_q1_answer">L'inscription est simple et rapide ! Cliquez sur le bouton "Commencer maintenant" sur la page d'accueil, choisissez votre type de profil (patient, médecin, pharmacien) et suivez les étapes. Vous aurez besoin d'une adresse e-mail valide.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-2">
+                        <span data-translate-key="faq_q2_question">Mes données de santé sont-elles sécurisées ?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer" id="faq-answer-2" hidden>
+                        <p data-translate-key="faq_q2_answer">Absolument. La sécurité de vos données est notre priorité absolue. Nous utilisons des protocoles de cryptage avancés et respectons les normes les plus strictes en matière de confidentialité des informations de santé. Consultez notre Politique de Confidentialité pour plus de détails.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-3">
+                        <span data-translate-key="faq_q3_question">Puis-je prendre rendez-vous avec n'importe quel médecin ?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer" id="faq-answer-3" hidden>
+                        <p data-translate-key="faq_q3_answer">Vous pouvez rechercher des médecins inscrits sur la plateforme Medicare+ et vérifier leurs disponibilités. Certains médecins peuvent nécessiter une première consultation en personne avant d'autoriser les téléconsultations.</p>
+                    </div>
+                </div>
+                 <div class="faq-item">
+                    <button class="faq-question" aria-expanded="false" aria-controls="faq-answer-4">
+                        <span data-translate-key="faq_q4_question">Comment fonctionne le renouvellement d'ordonnance ?</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <div class="faq-answer" id="faq-answer-4" hidden>
+                        <p data-translate-key="faq_q4_answer">Si votre médecin a activé cette fonctionnalité pour vous, vous pourrez demander un renouvellement d'ordonnance directement depuis votre espace patient. La demande sera envoyée à votre médecin pour approbation. Vous serez notifié de sa décision.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="partenaires" class="section"> 
+        <div class="container">
+            <h2 data-translate-key="partenaires_title">Nos Partenaires Santé</h2>
+            <div class="partners-logos">
+                <img src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 230 60' height='60'><style>.medicare-text { font-family: Poppins, sans-serif; font-size: 36px; font-weight: bold; fill: %23FF0000; } .plus-sign { font-family: Poppins, sans-serif; font-size: 40px; font-weight: bold; fill: %23FF0000; }</style><text x='5' y='42' class='medicare-text'>Medicare</text><text x='185' y='43' class='plus-sign'>+</text></svg>" alt="Logo Medicare+" class="medicare-plus-partner-logo">
+                <img src="https://cliniqueinternationale.ma/wp-content/uploads/2022/11/Logo-CIC.svg" alt="Logo Clinique Internationale de Casablanca" style="max-height: 70px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/a/a3/Logo_Institut_Pasteur.svg" alt="Logo Institut Pasteur" style="max-height: 65px;">
+                <img src="https://upload.wikimedia.org/wikipedia/fr/thumb/e/eb/Wafa_Assurance_Logo.svg/500px-Wafa_Assurance_Logo.svg.png" alt="Logo Wafa Assurance" style="max-height: 55px;">
+                <img src="https://asset.brandfetch.io/idq8_466N8/id4Qpr1gFa.svg" alt="Logo Sanlam Maroc" style="max-height: 50px;">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Pharmacie_Symbole.svg/100px-Pharmacie_Symbole.svg.png" alt="Symbole Pharmacie" style="max-height: 50px;">
+            </div>
+        </div>
+    </section>
+    
+    <section id="notifications-teaser" class="section"> 
+        <div class="container notification-content">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+            <p data-translate-key="notifications_teaser_text">Ne manquez plus rien ! Recevez des rappels intelligents pour vos traitements et rendez-vous directement sur la plateforme.</p>
+        </div>
+    </section>
+
+    <section id="video-temoignage" class="section"> 
+        <div class="container">
+            <h2 data-translate-key="video_temoignage_title">L'Expérience Medicare+ en Vidéo</h2>
+            <div class="video-wrapper">
+                <iframe src="https://www.youtube.com/embed/TdgG2X1nOMs" title="La télémédecine, comment ça marche ?" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section section">
+      <div class="container">
+        <h2 data-translate-key="contact_title">Contactez-Nous</h2>
+        <div class="contact-grid">
+          <div class="contact-info">
+            <h3 data-translate-key="contact_info_title">Nos Coordonnées</h3>
+            <p><i class="fas fa-envelope" aria-hidden="true"></i><strong data-translate-key="contact_email_label">Email :</strong> <a href="mailto:support@medicareplus.ma">support@medicareplus.ma</a></p>
+            <p><i class="fas fa-phone" aria-hidden="true"></i><strong data-translate-key="contact_phone_label">Téléphone :</strong> <a href="tel:+212512345678">+212 512 34 56 78</a></p>
+            <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i><strong data-translate-key="contact_address_label">Adresse :</strong> <span data-translate-key="contact_address_value">448 Rue de la Santé, Casablanca, Maroc</span></p>
+             <div class="map-container">
+              <iframe src="https://maps.google.com/maps?q=448%20Rue%20de%20la%20Sant%C3%A9%2C%20Casablanca%2C%20Maroc&t=&z=15&ie=UTF8&iwloc=&output=embed" width="100%" height="250" style="border:0; border-radius: 10px;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Carte de localisation Medicare+ Casablanca"></iframe>
+            </div>
+          </div>
+          <div class="contact-form-wrapper">
+            <h3 data-translate-key="contact_form_title">Envoyez-nous un message</h3>
+            <form id="contact-form" class="contact-form">
+              <label for="name" data-translate-key="contact_form_name_label">Nom Complet</label>
+              <input type="text" id="name" name="name" required placeholder="Ex: Jean Dupont" aria-required="true" data-translate-key-placeholder="contact_form_name_placeholder">
+              <label for="email" data-translate-key="contact_form_email_label">Adresse Email</label>
+              <input type="email" id="email" name="email" required placeholder="Ex: jean.dupont@email.com" aria-required="true" data-translate-key-placeholder="contact_form_email_placeholder">
+              <label for="subject" data-translate-key="contact_form_subject_label">Sujet</label>
+              <select id="subject" name="subject" required aria-required="true">
+                <option value="" disabled selected data-translate-key="contact_form_subject_option_default">-- Choisir un sujet --</option>
+                <option value="support" data-translate-key="contact_form_subject_option_support">Problème technique</option>
+                <option value="question" data-translate-key="contact_form_subject_option_question">Question sur le service</option>
+                <option value="partenariat" data-translate-key="contact_form_subject_option_partenariat">Demande de partenariat</option>
+                <option value="other" data-translate-key="contact_form_subject_option_other">Autre</option>
+              </select>
+              <label for="message" data-translate-key="contact_form_message_label">Votre Message</label>
+              <textarea id="message" name="message" required placeholder="Écrivez votre message ici..." aria-required="true" data-translate-key-placeholder="contact_form_message_placeholder"></textarea>
+              <button type="submit" class="btn-submit" data-translate-key="contact_form_submit_button">Envoyer le message</button>
+            </form>
+             <p id="form-feedback" class="form-feedback" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+   <footer role="contentinfo">
+        <div class="container footer-content">
+            <div class="footer-column footer-logo">
+                <a href="#hero" class="logo"><i class="fas fa-heartbeat" aria-hidden="true"></i> Medicare+</a>
+                <p class="footer-mission" data-translate-key="footer_mission">Simplifier votre parcours santé grâce à une plateforme connectée, sécurisée et intuitive.</p>
+                <div class="social-media">
+                    <a href="#" class="social-icon" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#" class="social-icon" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                    <a href="#" class="social-icon" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" class="social-icon" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+            <div class="footer-column footer-links">
+                <h4 data-translate-key="footer_quicklinks_title">Liens Rapides</h4>
+                <ul>
+                    <li><a href="#fonctionnalites" data-translate-key="nav_fonctionnalites">Fonctionnalités</a></li>
+                    <li><a href="#comment-ca-marche" data-translate-key="nav_comment_ca_marche">Comment ça marche</a></li>
+                    <li><a href="#temoignages-stats" data-translate-key="nav_avis">Témoignages</a></li>
+                    <li><a href="#blog" data-translate-key="nav_blog">Blog Santé</a></li>
+                    <li><a href="#faq" data-translate-key="nav_faq">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-links">
+                <h4 data-translate-key="footer_legal_title">Légal</h4>
+                <ul>
+                    <li><a href="#" data-translate-key="footer_privacy_policy">Politique de Confidentialité</a></li>
+                    <li><a href="#" data-translate-key="footer_terms_of_use">Conditions d'Utilisation</a></li>
+                    <li><a href="#" data-translate-key="footer_cookie_policy">Politique Cookies</a></li>
+                </ul>
+            </div>
+            <div class="footer-column footer-contact">
+                <h4 data-translate-key="footer_contact_us_title">Contactez-Nous</h4>
+                <p><i class="fas fa-map-marker-alt" aria-hidden="true"></i> <span data-translate-key="contact_address_value">448 Rue de la Santé, Casablanca</span></p>
+                <p><i class="fas fa-phone" aria-hidden="true"></i> <a href="tel:+212512345678">+212 512 34 56 78</a></p>
+                <p><i class="fas fa-envelope" aria-hidden="true"></i> <a href="mailto:support@medicareplus.ma">support@medicareplus.ma</a></p>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p data-translate-key="footer_copyright"></p> 
+        </div>
+   </footer>
+
+  <button id="btn-top" title="Retour en haut" aria-label="Retour en haut de la page" data-translate-key-title="back_to_top_title" data-translate-key-aria="back_to_top_aria_label">
+      <i class="fas fa-arrow-up"></i>
+  </button>
+
+  <div id="blog-modal" class="modal" hidden>
+      <div class="modal-content">
+          <span class="close-modal-btn" onclick="closeBlogModal()" title="Fermer" data-translate-key-title="close_modal_title">×</span>
+          <img id="modal-blog-image" src="" alt="Image de l'article de blog">
+          <h3 id="modal-blog-title"></h3>
+          <div id="modal-blog-author-date">
+            <span data-translate-key="blog_modal_author_label">Auteur:</span> <span id="modal-blog-author"></span> | 
+            <span data-translate-key="blog_modal_date_label">Date:</span> <span id="modal-blog-date"></span>
+          </div>
+          <div id="modal-blog-fulltext"></div>
+      </div>
+  </div>
+
+  <div class="chatbot-icon" id="chatbot-toggle" onclick="toggleChat()" aria-label="Ouvrir l'assistant santé" role="button" tabindex="0" data-translate-key-aria="chatbot_open_aria_label">
+      <i class="fas fa-robot"></i> 
+  </div>
+
+  <div class="chatbot-container" id="chatbotContainer" role="dialog" aria-modal="true" aria-labelledby="chatbot-header" hidden>
+      <div class="chatbot-header" id="chatbot-header" data-translate-key="chatbot_header_title">
+          Assistant Santé Medicare+
+          <span class="close-btn" onclick="toggleChat()" aria-label="Fermer l'assistant santé" role="button" tabindex="0" title="Fermer" data-translate-key-title="chatbot_close_title" data-translate-key-aria="chatbot_close_aria_label">×</span>
+      </div>
+      <div class="chatbot-body" id="chatbotBody">
+      </div>
+      <div class="chatbot-footer">
+          <input type="text" id="userInput" placeholder="Posez votre question..." aria-label="Votre message" data-translate-key-placeholder="chatbot_input_placeholder" data-translate-key-aria="chatbot_input_aria_label">
+          <button onclick="sendChatMessage()" aria-label="Envoyer le message" data-translate-key-aria="chatbot_send_aria_label">
+              <i class="fas fa-paper-plane"></i>
+          </button>
+      </div>
+  </div>
+
+  <script>
+    // --- Traductions (i18n) ---
+    const translations = {
+        en: {
+            // Navigation
+            "nav_accueil": "Home", "nav_fonctionnalites": "Features", "nav_comment_ca_marche": "How it works", "nav_avis": "Reviews", "nav_blog": "Blog", "nav_faq": "FAQ", "nav_contact": "Contact",
+            // Hero
+            "hero_title": "Welcome to <span>Medicare+</span>", "hero_subtitle": "Your daily connected health platform", "hero_description_site": "Manage your <strong>appointments</strong>, track your <strong>treatments</strong>, access your <strong>prescriptions</strong>, and communicate with your <strong>doctors</strong> easily. Take control of your health.", "hero_cta_button": "Get Started Now",
+            // Fonctionnalités
+            "fonctionnalites_title": "Our Essential Features", "feature1_title": "Medical Appointments", "feature1_desc": "Schedule and manage your online consultations in a few clicks.", "feature2_title": "Treatment Tracking", "feature2_desc": "Access your prescriptions and track your treatment progress.", "feature3_title": "Alerts", "feature3_desc": "Receive important notifications related to your health and care.", "feature4_title": "Health Journal", "feature4_desc": "Easily log your symptoms, moods, and medical history.",
+            // Comment ça marche
+            "comment_ca_marche_title": "How does it work?", "comment_ca_marche_intro": "Joining Medicare+ and managing your health has never been easier. Follow these quick steps to get started:", "step1_title": "1. Free Sign-up", "step1_desc": "Create your secure account as a patient, healthcare professional, or pharmacist in minutes.", "step2_title": "2. Customize Your Space", "step2_desc": "Complete your profile and set up your dashboard according to your medical needs.", "step3_title": "3. Book Appointments", "step3_desc": "Find a practitioner and book an online consultation.", "step4_title": "4. Track Your Treatment", "step4_desc": "Manage your prescriptions and receive helpful reminders. Never miss a treatment or appointment thanks to our smart alerts.",
+            // Témoignages
+            "temoignages_title": "What Our Users Say", "testimonial1_text": "Incredibly convenient for managing my appointments and my family's. No more forgetting!", "testimonial1_author": "– Sarah L., Patient", "testimonial2_text": "Secure messaging allows me to quickly communicate with my patients. A real plus.", "testimonial2_author": "– Dr. Karim B., General Practitioner", "testimonial3_text": "Finally a platform that centralizes everything! Treatment tracking is much simpler.", "testimonial3_author": "– Marc D., Chronic Patient", "testimonial4_text": "The interface is intuitive and customer support is very responsive. I highly recommend Medicare+!", "testimonial4_author": "– Amina K., Pharmacist", "carousel_prev_label": "Previous testimonial", "carousel_next_label": "Next testimonial",
+            // Stats
+            "stat1_label": "Patients successfully monitored", "stat2_label": "Partner healthcare professionals", "stat3_label": "Secure and confidential platform",
+            // Blog Section
+            "blog_section_title": "Our Latest Health Articles", "blog_cardio_title": "5 Tips to Improve Your Cardiovascular Health", "blog_cardio_summary": "Discover simple daily habits to take care of your heart...", "blog_stress_title": "Stress Management: Effective Relaxation Techniques", "blog_stress_summary": "Stress impacts your health. Learn simple methods to relax...", "blog_alimentation_title": "The Importance of a Balanced Diet", "blog_alimentation_summary": "Why eating well is crucial for your overall well-being and energy...", "blog_read_more": "Read More", "blog_modal_author_label": "Author:", "blog_modal_date_label": "Date:",
+            "blog_cardio_fulltext": "<p>Taking care of your cardiovascular health is essential for a long and healthy life. Here are five simple yet effective tips you can incorporate into your daily routine:</p><ol><li><strong>Eat a Heart-Healthy Diet:</strong> Focus on fruits, vegetables, whole grains, lean proteins, and healthy fats. Limit processed foods, sugary drinks, and excessive salt.</li><li><strong>Stay Physically Active:</strong> Aim for at least 150 minutes of moderate-intensity aerobic exercise or 75 minutes of vigorous-intensity exercise per week.</li><li><strong>Maintain a Healthy Weight:</strong> Excess weight can strain your heart. Even a small amount of weight loss can make a big difference.</li><li><strong>Don't Smoke:</strong> Smoking is one of the biggest risk factors for heart disease. If you smoke, seek help to quit.</li><li><strong>Manage Stress:</strong> Chronic stress can contribute to heart problems. Practice stress-reducing techniques like meditation, yoga, or spending time in nature.</li></ol><p>Consult your doctor before making any significant changes to your lifestyle or starting a new exercise program.</p>", "blog_cardio_date": "May 10, 2025",
+            "blog_stress_fulltext": "<p>In our fast-paced world, stress has become a common companion for many. However, chronic stress can take a toll on both your mental and physical health. Learning effective relaxation techniques can help you manage stress and improve your overall well-being.</p><ul><li><strong>Deep Breathing Exercises:</strong> Simple deep breathing can calm your nervous system. Inhale slowly through your nose, hold for a few seconds, and exhale slowly through your mouth.</li><li><strong>Progressive Muscle Relaxation:</strong> This technique involves tensing and then relaxing different muscle groups in your body.</li><li><strong>Mindfulness Meditation:</strong> Focus on your breath and observe your thoughts without judgment. Even a few minutes daily can help.</li><li><strong>Yoga or Tai Chi:</strong> These practices combine physical postures, breathing techniques, and meditation.</li><li><strong>Spending Time in Nature:</strong> Being outdoors has a naturally calming effect.</li></ul><p>Find what works best for you and make relaxation a regular part of your routine.</p>", "blog_stress_date": "May 5, 2025",
+            "blog_alimentation_fulltext": "<p>A balanced diet is the cornerstone of good health. It provides your body with the essential nutrients it needs to function optimally, maintain energy levels, and prevent chronic diseases.</p><p><strong>Key components of a balanced diet include:</strong></p><ul><li><strong>Fruits and Vegetables:</strong> Rich in vitamins, minerals, antioxidants, and fiber. Aim for a variety of colors.</li><li><strong>Whole Grains:</strong> Such as oats, brown rice, and whole-wheat bread, provide sustained energy and fiber.</li><li><strong>Lean Proteins:</strong> Found in fish, poultry, beans, lentils, and tofu, are important for muscle repair and growth.</li><li><strong>Healthy Fats:</strong> Sources like avocados, nuts, seeds, and olive oil are crucial for brain health and hormone production.</li><li><strong>Dairy or Alternatives:</strong> For calcium and vitamin D, essential for bone health.</li></ul><p>Remember to stay hydrated by drinking plenty of water throughout the day. Small, consistent changes to your diet can lead to significant health benefits over time.</p>", "blog_alimentation_date": "April 28, 2025",
+            // FAQ Section
+            "faq_section_title": "Frequently Asked Questions", "faq_q1_question": "How can I register on Medicare+?", "faq_q1_answer": "Registration is simple and quick! Click the 'Get Started Now' button on the homepage, choose your profile type (patient, doctor, pharmacist), and follow the steps. You will need a valid email address.", "faq_q2_question": "Is my health data secure?", "faq_q2_answer": "Absolutely. The security of your data is our top priority. We use advanced encryption protocols and adhere to the strictest standards for health information privacy. See our Privacy Policy for more details.", "faq_q3_question": "Can I make an appointment with any doctor?", "faq_q3_answer": "You can search for doctors registered on the Medicare+ platform and check their availability. Some doctors may require an initial in-person consultation before allowing teleconsultations.", "faq_q4_question": "How does prescription renewal work?", "faq_q4_answer": "If your doctor has enabled this feature for you, you can request a prescription renewal directly from your patient portal. The request will be sent to your doctor for approval. You will be notified of their decision.",
+            // Partenaires
+            "partenaires_title": "Our Health Partners",
+            // Notifications Teaser
+            "notifications_teaser_text": "Never miss a thing! Receive smart reminders for your treatments and appointments directly on the platform.",
+            // Video Témoignage
+            "video_temoignage_title": "The Medicare+ Experience in Video",
+            // Contact
+            "contact_title": "Contact Us", "contact_info_title": "Our Contact Information", "contact_email_label": "Email:", "contact_phone_label": "Phone:", "contact_address_label": "Address:", "contact_address_value": "448 Health St, Casablanca, Morocco", "contact_form_title": "Send us a message", "contact_form_name_label": "Full Name", "contact_form_name_placeholder": "E.g., John Doe", "contact_form_email_label": "Email Address", "contact_form_email_placeholder": "E.g., john.doe@email.com", "contact_form_subject_label": "Subject", "contact_form_subject_option_default": "-- Select a subject --", "contact_form_subject_option_support": "Technical issue", "contact_form_subject_option_question": "Question about the service", "contact_form_subject_option_partenariat": "Partnership inquiry", "contact_form_subject_option_other": "Other", "contact_form_message_label": "Your Message", "contact_form_message_placeholder": "Write your message here...", "contact_form_submit_button": "Send Message", "contact_form_feedback_success": "Message sent successfully! (This is a simulation)",
+            // Footer
+            "footer_mission": "Simplifying your health journey with a connected, secure, and intuitive platform.", "footer_quicklinks_title": "Quick Links", "footer_legal_title": "Legal", "footer_privacy_policy": "Privacy Policy", "footer_terms_of_use": "Terms of Use", "footer_cookie_policy": "Cookie Policy", "footer_contact_us_title": "Contact Us", "footer_copyright": "© <span id='current-year-placeholder'></span> Medicare+. All rights reserved.",
+            // Bouton Back to Top
+            "back_to_top_title": "Back to top", "back_to_top_aria_label": "Back to top of the page",
+            // Modals
+            "close_modal_title": "Close",
+            // Chatbot
+            "chatbot_header_title": "Medicare+ Health Assistant", "chatbot_open_aria_label": "Open health assistant", "chatbot_close_title": "Close", "chatbot_close_aria_label": "Close health assistant", "chatbot_initial_greeting": "Hello! How can I help you today on Medicare+?", "chatbot_predefined_q1": "📅 My appointments", "chatbot_predefined_q2": "💊 My prescriptions", "chatbot_predefined_q3": "👨‍⚕️ Talk to a doctor", "chatbot_predefined_q4": "❓ Technical help", "chatbot_input_placeholder": "Ask your question...", "chatbot_input_aria_label": "Your message", "chatbot_send_aria_label": "Send message", "chatbot_typing": "<i>Assistant is typing...</i>", "chatbot_default_reply": "I'm not sure I understand. Can you rephrase or choose an option?", "chatbot_appointments_reply": "To manage your appointments, please log in to your patient portal and go to the 'My Appointments' section.", "chatbot_prescriptions_reply": "Your prescriptions are available in the 'My Prescriptions' section of your account after logging in.", "chatbot_doctor_reply": "You can find a doctor or contact yours via secure messaging once logged into your portal.", "chatbot_hello_reply": "Hello! How can I assist you today?", "chatbot_help_reply": "For technical help or any other questions, you can check our <a href='#contact'>Contact page</a> or call our support.", "chatbot_thanks_reply": "You're welcome! Feel free to ask if you have other questions.", "chatbot_history_cleared": "Chat history has been cleared due to its size or corruption.", "chatbot_history_loaded": "Chat history restored."
+        },
+        fr: { 
+            "nav_accueil": "Accueil", "nav_fonctionnalites": "Fonctionnalités", "nav_comment_ca_marche": "Comment ça marche", "nav_avis": "Avis", "nav_blog": "Blog", "nav_faq": "FAQ", "nav_contact": "Contact",
+            "hero_title": "Bienvenue sur <span>Medicare+</span>", "hero_subtitle": "Votre plateforme de santé connectée au quotidien", "hero_description_site": "Gérez vos <strong>rendez-vous</strong>, suivez vos <strong>traitements</strong>, accédez à vos <strong>ordonnances</strong> et communiquez avec vos <strong>médecins</strong> facilement. Prenez le contrôle de votre santé.", "hero_cta_button": "Commencer maintenant",
+            "fonctionnalites_title": "Nos Fonctionnalités Essentielles", "feature1_title": "Rendez-vous médicaux", "feature1_desc": "Planifiez et gérez vos consultations en ligne en quelques clics.", "feature2_title": "Suivi des traitements", "feature2_desc": "Accédez à vos ordonnances et suivez l'évolution de vos traitements.", "feature3_title": "Alertes", "feature3_desc": "Recevez des notifications importantes liées à votre santé et vos soins.", "feature4_title": "Journal de santé", "feature4_desc": "Consignez vos symptômes, humeurs et antécédents médicaux facilement.",
+            "comment_ca_marche_title": "Comment ça marche ?", "comment_ca_marche_intro": "Rejoindre Medicare+ et gérer votre santé n'a jamais été aussi simple. Suivez ces étapes rapides pour commencer :", "step1_title": "1. Inscription gratuite", "step1_desc": "Créez votre compte sécurisé en tant que patient, professionnel de santé ou pharmacien en quelques minutes.", "step2_title": "2. Personnalisez votre espace", "step2_desc": "Complétez votre profil et configurez votre tableau de bord selon vos besoins médicaux.", "step3_title": "3. Prenez rendez-vous", "step3_desc": "Trouvez un praticien et réservez une consultation en ligne.", "step4_title": "4. Suivez votre traitement", "step4_desc": "Gérez vos ordonnances et recevez des rappels utiles. Ne manquez plus aucun traitement ou rendez-vous grâce à nos alertes intelligentes.",
+            "temoignages_title": "Ce que disent nos utilisateurs", "testimonial1_text": "Incredibly convenient for managing my appointments and my family's. No more forgetting!", "testimonial1_author": "– Sarah L., Patiente", "testimonial2_text": "Secure messaging allows me to quickly communicate with my patients. A real plus.", "testimonial2_author": "– Dr. Karim B., Médecin Généraliste", "testimonial3_text": "Finally a platform that centralizes everything! Treatment tracking is much simpler.", "testimonial3_author": "– Marc D., Patient chronique", "testimonial4_text": "L'interface est intuitive et le support client est très réactif. Je recommande vivement Medicare+ !", "testimonial4_author": "– Amina K., Pharmacienne", "carousel_prev_label": "Témoignage précédent", "carousel_next_label": "Témoignage suivant",
+            "stat1_label": "Patients suivis avec succès", "stat2_label": "Professionnels de santé partenaires", "stat3_label": "Plateforme sécurisée et confidentielle",
+            "blog_section_title": "Nos derniers articles santé", "blog_cardio_title": "5 conseils pour améliorer votre santé cardiovasculaire", "blog_cardio_summary": "Découvrez des gestes simples à adopter au quotidien pour prendre soin de votre cœur...", "blog_stress_title": "Gestion du stress : Techniques de relaxation efficaces", "blog_stress_summary": "Le stress impacte votre santé. Apprenez des méthodes simples pour vous détendre...", "blog_alimentation_title": "L'importance d'une alimentation équilibrée", "blog_alimentation_summary": "Pourquoi bien manger est crucial pour votre bien-être général et votre énergie...", "blog_read_more": "Lire plus", "blog_modal_author_label": "Auteur :", "blog_modal_date_label": "Date :",
+            "blog_cardio_fulltext": "<p>Prendre soin de sa santé cardiovasculaire est essentiel pour une vie longue et saine. Voici cinq conseils simples mais efficaces à intégrer dans votre quotidien :</p><ol><li><strong>Adoptez une alimentation saine pour le cœur :</strong> Privilégiez les fruits, légumes, céréales complètes, protéines maigres et bonnes graisses. Limitez les aliments transformés, les boissons sucrées et l'excès de sel.</li><li><strong>Restez actif physiquement :</strong> Visez au moins 150 minutes d'exercice aérobique d'intensité modérée ou 75 minutes d'intensité vigoureuse par semaine.</li><li><strong>Maintenez un poids santé :</strong> Le surpoids peut surcharger votre cœur. Même une petite perte de poids peut faire une grande différence.</li><li><strong>Ne fumez pas :</strong> Le tabagisme est l'un des principaux facteurs de risque des maladies cardiaques. Si vous fumez, cherchez de l'aide pour arrêter.</li><li><strong>Gérez votre stress :</strong> Le stress chronique peut contribuer aux problèmes cardiaques. Pratiquez des techniques de réduction du stress comme la méditation, le yoga ou passez du temps dans la nature.</li></ol><p>Consultez votre médecin avant d'apporter des changements importants à votre mode de vie ou de commencer un nouveau programme d'exercice.</p>", "blog_cardio_date": "10 Mai 2025",
+            "blog_stress_fulltext": "<p>Dans notre monde au rythme effréné, le stress est devenu un compagnon fréquent pour beaucoup. Cependant, le stress chronique peut nuire à votre santé mentale et physique. Apprendre des techniques de relaxation efficaces peut vous aider à gérer le stress et à améliorer votre bien-être général.</p><ul><li><strong>Exercices de respiration profonde :</strong> Une simple respiration profonde peut calmer votre système nerveux. Inspirez lentement par le nez, retenez quelques secondes, et expirez lentement par la bouche.</li><li><strong>Relaxation musculaire progressive :</strong> Cette technique consiste à contracter puis à relâcher différents groupes musculaires de votre corps.</li><li><strong>Méditation de pleine conscience :</strong> Concentrez-vous sur votre respiration et observez vos pensées sans jugement. Même quelques minutes par jour peuvent aider.</li><li><strong>Yoga ou Tai Chi :</strong> Ces pratiques combinent postures physiques, techniques de respiration et méditation.</li><li><strong>Passer du temps dans la nature :</strong> Être à l'extérieur a un effet naturellement apaisant.</li></ul><p>Trouvez ce qui vous convient le mieux et intégrez la relaxation régulièrement dans votre routine.</p>", "blog_stress_date": "05 Mai 2025",
+            "blog_alimentation_fulltext": "<p>Une alimentation équilibrée est la pierre angulaire d'une bonne santé. Elle fournit à votre corps les nutriments essentiels dont il a besoin pour fonctionner de manière optimale, maintenir son niveau d'énergie et prévenir les maladies chroniques.</p><p><strong>Les éléments clés d'une alimentation équilibrée comprennent :</strong></p><ul><li><strong>Fruits et légumes :</strong> Riches en vitamines, minéraux, antioxydants et fibres. Visez une variété de couleurs.</li><li><strong>Céréales complètes :</strong> Comme l'avoine, le riz brun et le pain de blé entier, fournissent une énergie durable et des fibres.</li><li><strong>Protéines maigres :</strong> Présentes dans le poisson, la volaille, les haricots, les lentilles et le tofu, elles sont importantes pour la réparation et la croissance musculaire.</li><li><strong>Bonnes graisses :</strong> Des sources comme les avocats, les noix, les graines et l'huile d'olive sont cruciales pour la santé du cerveau et la production d'hormones.</li><li><strong>Produits laitiers ou alternatives :</strong> Pour le calcium et la vitamine D, essentiels à la santé des os.</li></ul><p>N'oubliez pas de rester hydraté en buvant beaucoup d'eau tout au long de la journée. De petits changements constants dans votre alimentation peuvent entraîner des avantages significatifs pour la santé à long terme.</p>", "blog_alimentation_date": "28 Avril 2025",
+            "faq_section_title": "Questions Fréquemment Posées", "faq_q1_question": "Comment puis-je m'inscrire sur Medicare+ ?", "faq_q1_answer": "L'inscription est simple et rapide ! Cliquez sur le bouton \"Commencer maintenant\" sur la page d'accueil, choisissez votre type de profil (patient, médecin, pharmacien) et suivez les étapes. Vous aurez besoin d'une adresse e-mail valide.", "faq_q2_question": "Mes données de santé sont-elles sécurisées ?", "faq_q2_answer": "Absolument. La sécurité de vos données est notre priorité absolue. Nous utilisons des protocoles de cryptage avancés et respectons les normes les plus strictes en matière de confidentialité des informations de santé. Consultez notre Politique de Confidentialité pour plus de détails.", "faq_q3_question": "Puis-je prendre rendez-vous avec n'importe quel médecin ?", "faq_q3_answer": "Vous pouvez rechercher des médecins inscrits sur la plateforme Medicare+ et vérifier leurs disponibilités. Certains médecins peuvent nécessiter une première consultation en personne avant d'autoriser les téléconsultations.", "faq_q4_question": "Comment fonctionne le renouvellement d'ordonnance ?", "faq_q4_answer": "Si votre médecin a activé cette fonctionnalité pour vous, vous pourrez demander un renouvellement d'ordonnance directement depuis votre espace patient. La demande sera envoyée à votre médecin pour approbation. Vous serez notifié de sa décision.",
+            "partenaires_title": "Nos Partenaires Santé",
+            "notifications_teaser_text": "Ne manquez plus rien ! Recevez des rappels intelligents pour vos traitements et rendez-vous directement sur la plateforme.",
+            "video_temoignage_title": "L'Expérience Medicare+ en Vidéo",
+            "contact_title": "Contactez-Nous", "contact_info_title": "Nos Coordonnées", "contact_email_label": "Email :", "contact_phone_label": "Téléphone :", "contact_address_label": "Adresse :", "contact_address_value": "448 Rue de la Santé, Casablanca, Maroc", "contact_form_title": "Envoyez-nous un message", "contact_form_name_label": "Nom Complet", "contact_form_name_placeholder": "Ex: Jean Dupont", "contact_form_email_label": "Adresse Email", "contact_form_email_placeholder": "Ex: jean.dupont@email.com", "contact_form_subject_label": "Sujet", "contact_form_subject_option_default": "-- Choisir un sujet --", "contact_form_subject_option_support": "Problème technique", "contact_form_subject_option_question": "Question sur le service", "contact_form_subject_option_partenariat": "Demande de partenariat", "contact_form_subject_option_other": "Autre", "contact_form_message_label": "Votre Message", "contact_form_message_placeholder": "Écrivez votre message ici...", "contact_form_submit_button": "Envoyer le message", "contact_form_feedback_success": "Message envoyé avec succès ! (Ceci est une simulation)",
+            "footer_mission": "Simplifier votre parcours santé grâce à une plateforme connectée, sécurisée et intuitive.", "footer_quicklinks_title": "Liens Rapides", "footer_legal_title": "Légal", "footer_privacy_policy": "Politique de Confidentialité", "footer_terms_of_use": "Conditions d'Utilisation", "footer_cookie_policy": "Politique Cookies", "footer_contact_us_title": "Contactez-Nous", "footer_copyright": "© <span id='current-year-placeholder'></span> Medicare+. Tous droits réservés.",
+            "back_to_top_title": "Retour en haut", "back_to_top_aria_label": "Retour en haut de la page",
+            "close_modal_title": "Fermer",
+            "chatbot_header_title": "Assistant Santé Medicare+", "chatbot_open_aria_label": "Ouvrir l'assistant santé", "chatbot_close_title": "Fermer", "chatbot_close_aria_label": "Fermer l'assistant santé", "chatbot_initial_greeting": "Bonjour ! Comment puis-je vous aider aujourd'hui sur Medicare+ ?", "chatbot_predefined_q1": "📅 Mes rendez-vous", "chatbot_predefined_q2": "💊 Mes ordonnances", "chatbot_predefined_q3": "👨‍⚕️ Parler à un médecin", "chatbot_predefined_q4": "❓ Aide technique", "chatbot_input_placeholder": "Posez votre question...", "chatbot_input_aria_label": "Votre message", "chatbot_send_aria_label": "Envoyer le message", "chatbot_typing": "<i>Assistant écrit...</i>", "chatbot_default_reply": "Je ne suis pas sûr de comprendre. Pouvez-vous reformuler ou choisir une option ?", "chatbot_appointments_reply": "Pour gérer vos rendez-vous, veuillez vous connecter à votre espace patient et accéder à la section 'Mes Rendez-vous'.", "chatbot_prescriptions_reply": "Vos ordonnances sont disponibles dans la section 'Mes Ordonnances' de votre compte après connexion.", "chatbot_doctor_reply": "Vous pouvez trouver un médecin ou contacter le vôtre via la messagerie sécurisée une fois connecté à votre espace.", "chatbot_hello_reply": "Bonjour ! Comment puis-je vous assister aujourd'hui ?", "chatbot_help_reply": "Pour une aide technique ou toute autre question, vous pouvez consulter notre <a href='#contact'>page Contact</a> ou appeler notre support.", "chatbot_thanks_reply": "De rien ! N'hésitez pas si vous avez d'autres questions.", "chatbot_history_cleared": "L'historique du chat a été effacé en raison de sa taille ou d'une corruption.", "chatbot_history_loaded": "Historique du chat restauré."
+        }
+    };
+
+    const blogPostsData = {
+        cardio: { imageSrc: "https://picsum.photos/seed/santeCardio/600/300", titleKey: "blog_cardio_title", fullTextKey: "blog_cardio_fulltext", author: "Dr. Vitalis", dateKey: "blog_cardio_date" },
+        stress: { imageSrc: "https://picsum.photos/seed/gestionStress/600/300", titleKey: "blog_stress_title", fullTextKey: "blog_stress_fulltext", author: "Dr. Serena", dateKey: "blog_stress_date" },
+        alimentation: { imageSrc: "https://picsum.photos/seed/alimentationSaine/600/300", titleKey: "blog_alimentation_title", fullTextKey: "blog_alimentation_fulltext", author: "Nutri Conseil", dateKey: "blog_alimentation_date" }
+    };
+
+    const langLinks = document.querySelectorAll('.lang-link');
+    const burgerBtn = document.querySelector('.burger-menu');
+    const nav = document.querySelector('header nav');
+    const btnTop = document.getElementById('btn-top');
+    const chatbotContainer = document.getElementById('chatbotContainer');
+    const chatbotToggle = document.getElementById('chatbot-toggle');
+    const chatbotInput = document.getElementById('userInput');
+    const chatbotBody = document.getElementById('chatbotBody');
+    const contactForm = document.getElementById('contact-form');
+    const formFeedback = document.getElementById('form-feedback');
+    const blogModal = document.getElementById('blog-modal');
+    const modalBlogImage = document.getElementById('modal-blog-image');
+    const modalBlogTitle = document.getElementById('modal-blog-title');
+    const modalBlogAuthor = document.getElementById('modal-blog-author');
+    const modalBlogDate = document.getElementById('modal-blog-date');
+    const modalBlogFulltext = document.getElementById('modal-blog-fulltext');
+    const faqItems = document.querySelectorAll('.faq-item');
+    const testimonialCarousel = document.querySelector('.testimonial-carousel');
+    const testimonialCards = document.querySelectorAll('.testimonial-card');
+    const prevBtn = document.querySelector('.carousel-btn.prev');
+    const nextBtn = document.querySelector('.carousel-btn.next');
+    const dotsContainer = document.querySelector('.carousel-dots');
+    let currentSlide = 0;
+    let testimonialInterval;
+    let currentLang = localStorage.getItem('preferredLang') || 'fr';
+    const CHATBOT_HISTORY_KEY = 'medicareChatHistory';
+    const MAX_HISTORY_LENGTH = 30; 
+    let chatHistory = [];
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        localStorage.setItem('preferredLang', lang);
+        document.documentElement.lang = lang;
+        langLinks.forEach(link => link.classList.toggle('active', link.getAttribute('data-lang') === lang));
+
+        document.querySelectorAll('[data-translate-key]').forEach(el => {
+            const key = el.getAttribute('data-translate-key');
+            if (translations[lang]?.[key]) {
+                el.innerHTML = translations[lang][key].includes('<') ? translations[lang][key] : translations[lang][key];
+            }
+        });
+        document.querySelectorAll('[data-translate-key-placeholder]').forEach(el => {
+            const key = el.getAttribute('data-translate-key-placeholder');
+            if (translations[lang]?.[key]) el.placeholder = translations[lang][key];
+        });
+        document.querySelectorAll('[data-translate-key-title]').forEach(el => {
+            const key = el.getAttribute('data-translate-key-title');
+            if (translations[lang]?.[key]) el.title = translations[lang][key];
+        });
+        document.querySelectorAll('[data-translate-key-aria]').forEach(el => {
+            const key = el.getAttribute('data-translate-key-aria');
+            if (translations[lang]?.[key]) el.setAttribute('aria-label', translations[lang][key]);
+        });
+        
+        const year = new Date().getFullYear();
+        const copyrightKey = "footer_copyright";
+        const copyrightElement = document.querySelector(`[data-translate-key="${copyrightKey}"]`);
+        if (copyrightElement && translations[lang]?.[copyrightKey]) {
+            copyrightElement.innerHTML = translations[lang][copyrightKey].replace("<span id='current-year-placeholder'></span>", year);
+        } else if (copyrightElement) {
+             copyrightElement.innerHTML = `© ${year} Medicare+. Tous droits réservés.`;
+        }
+
+        initializeChatbotMessages();
+        if (blogModal.classList.contains('open')) {
+            const currentOpenBlogId = blogModal.dataset.currentBlogId;
+            if (currentOpenBlogId) openBlogModal(currentOpenBlogId, false);
+        }
+    }
+
+    const sections = document.querySelectorAll('.section');
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    const observerOptions = { root: null, rootMargin: '0px', threshold: 0.1 };
+    const observerCallback = (entries) => entries.forEach(entry => entry.isIntersecting && entry.target.classList.add('visible'));
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    sections.forEach(section => observer.observe(section));
+    timelineItems.forEach(item => observer.observe(item));
+    if (!('IntersectionObserver' in window)) {
+        sections.forEach(section => section.classList.add('no-js-visible'));
+        timelineItems.forEach(item => item.classList.add('no-js-visible'));
+    }
+
+    window.onscroll = () => btnTop && (btnTop.style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? 'block' : 'none');
+    btnTop?.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    if(burgerBtn && nav) {
+        burgerBtn.addEventListener('click', () => {
+            const isExpanded = burgerBtn.getAttribute('aria-expanded') === 'true';
+            burgerBtn.setAttribute('aria-expanded', !isExpanded);
+            nav.classList.toggle('mobile-active');
+            burgerBtn.querySelector('i').classList.toggle('fa-bars');
+            burgerBtn.querySelector('i').classList.toggle('fa-times');
+            if (!isExpanded) nav.querySelector('a')?.focus(); else burgerBtn.focus();
+        });
+        nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => nav.classList.contains('mobile-active') && burgerBtn.click()));
+    }
+
+    function openBlogModal(postId, toggleClass = true) {
+        const postData = blogPostsData[postId];
+        if (!postData || !blogModal) return;
+        blogModal.dataset.currentBlogId = postId;
+        modalBlogImage.src = postData.imageSrc;
+        modalBlogImage.alt = translations[currentLang]?.[postData.titleKey] || postData.titleKey;
+        modalBlogTitle.innerHTML = translations[currentLang]?.[postData.titleKey] || "Titre non disponible";
+        modalBlogAuthor.textContent = postData.author;
+        modalBlogDate.textContent = translations[currentLang]?.[postData.dateKey] || postData.dateKey;
+        modalBlogFulltext.innerHTML = translations[currentLang]?.[postData.fullTextKey] || "Contenu non disponible.";
+        if (toggleClass) {
+            blogModal.classList.add('open'); blogModal.hidden = false; document.body.style.overflow = 'hidden';
+        }
+    }
+    function closeBlogModal() {
+        if (!blogModal) return;
+        blogModal.classList.remove('open'); blogModal.hidden = true; blogModal.removeAttribute('data-current-blog-id'); document.body.style.overflow = '';
+    }
+    window.addEventListener('keydown', e => e.key === 'Escape' && blogModal?.classList.contains('open') && closeBlogModal());
+    blogModal?.addEventListener('click', e => e.target === blogModal && closeBlogModal());
+
+    faqItems.forEach(item => {
+        const qButton = item.querySelector('.faq-question');
+        const answerDiv = item.querySelector('.faq-answer');
+        qButton?.addEventListener('click', () => {
+            const isOpening = qButton.getAttribute('aria-expanded') === 'false';
+            item.classList.toggle('open', isOpening);
+            qButton.setAttribute('aria-expanded', isOpening.toString());
+            answerDiv.hidden = !isOpening;
+            answerDiv.style.maxHeight = isOpening ? answerDiv.scrollHeight + 'px' : null;
+        });
+    });
+
+    function setupCarousel() {
+        if (!testimonialCarousel || testimonialCards.length === 0 || !dotsContainer) return;
+        dotsContainer.innerHTML = '';
+        testimonialCards.forEach((_, i) => {
+            const dot = document.createElement('button');
+            dot.className = 'carousel-dot'; dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+            if (i === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => { currentSlide = i; updateCarousel(); resetCarouselInterval(); });
+            dotsContainer.appendChild(dot);
+        });
+        updateCarousel(); startCarouselInterval();
+    }
+    function updateCarousel() {
+        if (window.innerWidth <= 768) { testimonialCarousel.style.transform = 'none'; testimonialCards.forEach(c => c.classList.remove('active-slide')); return; }
+        testimonialCarousel.style.transform = `translateX(${-currentSlide * 100}%)`;
+        dotsContainer.querySelectorAll('.carousel-dot').forEach((d, i) => d.classList.toggle('active', i === currentSlide));
+        testimonialCards.forEach((c, i) => c.classList.toggle('active-slide', i === currentSlide));
+        if(prevBtn) prevBtn.disabled = currentSlide === 0;
+        if(nextBtn) nextBtn.disabled = currentSlide === testimonialCards.length - 1;
+    }
+    function startCarouselInterval() { clearInterval(testimonialInterval); testimonialInterval = setInterval(() => { currentSlide = (currentSlide + 1) % testimonialCards.length; updateCarousel(); }, 7000); }
+    function resetCarouselInterval() { clearInterval(testimonialInterval); startCarouselInterval(); }
+    prevBtn?.addEventListener('click', () => { if (currentSlide > 0) { currentSlide--; updateCarousel(); resetCarouselInterval(); } });
+    nextBtn?.addEventListener('click', () => { if (currentSlide < testimonialCards.length - 1) { currentSlide++; updateCarousel(); resetCarouselInterval(); } });
+    window.addEventListener('resize', () => setTimeout(setupCarousel, 100));
+
+    function loadChatHistory() {
+        const stored = localStorage.getItem(CHATBOT_HISTORY_KEY);
+        if (!stored) return;
+        try {
+            chatHistory = JSON.parse(stored);
+            if (!Array.isArray(chatHistory)) chatHistory = [];
+            chatHistory = chatHistory.slice(-MAX_HISTORY_LENGTH);
+            chatHistory.forEach(msg => addMessageToUI(msg.message, msg.sender, false));
+            if (chatHistory.length > 0) chatbotBody.querySelector('.predefined-questions')?.remove();
+        } catch (e) {
+            chatHistory = []; localStorage.removeItem(CHATBOT_HISTORY_KEY);
+            addMessageToUI(translations[currentLang]?.chatbot_history_cleared || "Erreur d'historique.", 'bot', false);
+        }
+    }
+    function saveChatHistory() {
+        chatHistory = chatHistory.slice(-MAX_HISTORY_LENGTH);
+        try { localStorage.setItem(CHATBOT_HISTORY_KEY, JSON.stringify(chatHistory)); } catch (e) { console.error("Erreur sauvegarde chat:", e); }
+    }
+    function addMessageToHistory(message, sender) { chatHistory.push({ message, sender, t: Date.now() }); saveChatHistory(); }
+    function addMessageToUI(message, sender, save = true) {
+        const div = document.createElement('div');
+        div.className = sender === 'user' ? 'user-message' : 'bot-message';
+        if (sender === 'bot') div.innerHTML = message; else div.textContent = message;
+        if (sender === 'user') chatbotBody.querySelector('.predefined-questions')?.remove();
+        chatbotBody.appendChild(div); chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        if (save) addMessageToHistory(message, sender);
+    }
+    function initializeChatbotMessages() {
+        chatbotBody.innerHTML = ''; loadChatHistory();
+        if (chatHistory.length === 0) {
+            addMessageToUI(translations[currentLang]?.chatbot_initial_greeting || "Bonjour!", 'bot', false); // Ne pas sauvegarder le message initial
+            const pqDiv = document.createElement('div'); pqDiv.className = 'predefined-questions';
+            [
+                { k: "chatbot_predefined_q1", q: "Mes rendez-vous" }, { k: "chatbot_predefined_q2", q: "Mes ordonnances" },
+                { k: "chatbot_predefined_q3", q: "Parler à un médecin" }, { k: "chatbot_predefined_q4", q: "Aide technique" }
+            ].forEach(item => {
+                const btn = document.createElement('button');
+                btn.innerHTML = translations[currentLang]?.[item.k] || item.q;
+                btn.onclick = () => sendPredefinedQuestion(item.q);
+                pqDiv.appendChild(btn);
+            });
+            chatbotBody.appendChild(pqDiv);
+        }
+    }
+    function toggleChat() {
+        const isHidden = chatbotContainer.style.display === 'none' || !chatbotContainer.style.display;
+        chatbotContainer.style.display = isHidden ? 'flex' : 'none'; chatbotContainer.hidden = !isHidden;
+        chatbotToggle.setAttribute('aria-label', translations[currentLang]?.[isHidden ? 'chatbot_close_aria_label' : 'chatbot_open_aria_label']);
+        chatbotToggle.setAttribute('aria-expanded', isHidden.toString());
+        if (isHidden) { chatbotInput.focus(); if (chatbotBody.innerHTML.trim() === '') initializeChatbotMessages(); }
+        else chatbotToggle.focus();
+    }
+    if(chatbotContainer) chatbotContainer.style.display = 'none';
+    function sendPredefinedQuestion(query) { addMessageToUI(query, 'user'); handleBotResponse(query); }
+    window.sendChatMessage = () => { // Make it global for onclick
+        const msg = chatbotInput.value.trim();
+        if (msg) { addMessageToUI(msg, 'user'); chatbotInput.value = ''; handleBotResponse(msg); }
+    };
+    chatbotInput?.addEventListener('keypress', e => e.key === 'Enter' && (e.preventDefault(), sendChatMessage()));
+    function handleBotResponse(userMsg) {
+        let respKey = "chatbot_default_reply";
+        const lcMsg = userMsg.toLowerCase();
+        const t = translations[currentLang] || translations.fr; // Fallback to fr if lang not found
+        
+        // Vérifier si la question correspond à une question prédéfinie
+        let isPredefinedQuestion = false;
+        
+        if (lcMsg.includes((t.chatbot_predefined_q1||"").substring(2).toLowerCase().trim()) || lcMsg.includes("rendez-vous") || lcMsg.includes("rdv")) {
+            respKey = "chatbot_appointments_reply";
+            isPredefinedQuestion = true;
+        }
+        else if (lcMsg.includes((t.chatbot_predefined_q2||"").substring(2).toLowerCase().trim()) || lcMsg.includes("ordonnance") || lcMsg.includes("traitement")) {
+            respKey = "chatbot_prescriptions_reply";
+            isPredefinedQuestion = true;
+        }
+        else if (lcMsg.includes((t.chatbot_predefined_q3||"").substring(3).toLowerCase().trim()) || lcMsg.includes("médecin") || lcMsg.includes("docteur")) {
+            respKey = "chatbot_doctor_reply";
+            isPredefinedQuestion = true;
+        }
+        else if (lcMsg.includes("bonjour") || lcMsg.includes("salut") || lcMsg.includes("hello")) {
+            respKey = "chatbot_hello_reply";
+            isPredefinedQuestion = true;
+        }
+        else if (lcMsg.includes((t.chatbot_predefined_q4||"").substring(2).toLowerCase().trim()) || lcMsg.includes("aide") || lcMsg.includes("support") || lcMsg.includes("technique")) {
+            respKey = "chatbot_help_reply";
+            isPredefinedQuestion = true;
+        }
+        else if (lcMsg.includes("merci")) {
+            respKey = "chatbot_thanks_reply";
+            isPredefinedQuestion = true;
+        }
+        
+        const respText = t[respKey] || t.chatbot_default_reply;
+        const typingDiv = document.createElement('div');
+        typingDiv.className = 'bot-message typing-message';
+        typingDiv.innerHTML = t.chatbot_typing || "<i>Assistant écrit...</i>";
+        chatbotBody.appendChild(typingDiv);
+        chatbotBody.scrollTop = chatbotBody.scrollHeight;
+        
+        setTimeout(() => {
+            typingDiv.remove();
+            addMessageToUI(respText, 'bot');
+            
+            // Si ce n'est pas une question prédéfinie, réafficher les questions prédéfinies
+            if (!isPredefinedQuestion) {
+                const pqDiv = document.createElement('div');
+                pqDiv.className = 'predefined-questions';
+                [
+                    { k: "chatbot_predefined_q1", q: "Mes rendez-vous" },
+                    { k: "chatbot_predefined_q2", q: "Mes ordonnances" },
+                    { k: "chatbot_predefined_q3", q: "Parler à un médecin" },
+                    { k: "chatbot_predefined_q4", q: "Aide technique" }
+                ].forEach(item => {
+                    const btn = document.createElement('button');
+                    btn.innerHTML = translations[currentLang]?.[item.k] || item.q;
+                    btn.onclick = () => sendPredefinedQuestion(item.q);
+                    pqDiv.appendChild(btn);
+                });
+                chatbotBody.appendChild(pqDiv);
+                chatbotBody.scrollTop = chatbotBody.scrollHeight;
+            }
+        }, 800 + Math.random() * 400);
+    }
+
+    contactForm?.addEventListener('submit', e => {
+        e.preventDefault(); 
+        formFeedback.textContent = translations[currentLang]?.contact_form_feedback_success || 'Message envoyé ! (Simulation)';
+        formFeedback.style.color = 'var(--primary-color)';
+        setTimeout(() => { contactForm.reset(); formFeedback.textContent = ''; }, 4000);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+        setLanguage(currentLang); 
+        setupCarousel(); 
+        langLinks.forEach(link => link.addEventListener('click', e => setLanguage(e.target.getAttribute('data-lang'))));
+        // Ensure chatbot messages are set up for the first open
+        if ((!chatbotContainer.style.display || chatbotContainer.style.display === 'none') && chatHistory.length === 0) {
+            initializeChatbotMessages();
+        }
+    });
+  </script>
+
+</body>
+</html>

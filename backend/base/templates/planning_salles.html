@@ -1,0 +1,131 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-calendar'></i> Planning des Salles</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addReservationModal">
+            <i class='bx bx-plus'></i> Nouvelle Réservation
+        </button>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tableau des réservations -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Salle</th>
+                            <th>Horaire</th>
+                            <th>Motif</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for reservation in reservations %}
+                        <tr>
+                            <td>{{ reservation.date }}</td>
+                            <td>{{ reservation.salle.numero }} ({{ reservation.salle.type }})</td>
+                            <td>{{ reservation.heure_debut }} - {{ reservation.heure_fin }}</td>
+                            <td>{{ reservation.motif }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-danger" onclick="cancelReservation({{ reservation.id }})">
+                                    <i class='bx bx-x'></i> Annuler
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucune réservation</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Réservation -->
+<div class="modal fade" id="addReservationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class='bx bx-plus-circle'></i> Nouvelle Réservation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_reservation">
+                    <div class="mb-3">
+                        <label class="form-label">Salle</label>
+                        <select class="form-select" name="salle" required>
+                            <option value="">Sélectionner une salle</option>
+                            {% for salle in salles %}
+                            <option value="{{ salle.id }}">{{ salle.numero }} ({{ salle.type }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date</label>
+                        <input type="date" class="form-control" name="date" required min="{{ today|date:'Y-m-d' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Heure de début</label>
+                        <input type="time" class="form-control" name="heure_debut" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Heure de fin</label>
+                        <input type="time" class="form-control" name="heure_fin" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Motif</label>
+                        <textarea class="form-control" name="motif" rows="3" required></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Réserver</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function cancelReservation(id) {
+    if (confirm('Êtes-vous sûr de vouloir annuler cette réservation ?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            {% csrf_token %}
+            <input type="hidden" name="action" value="cancel_reservation">
+            <input type="hidden" name="reservation_id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Initialiser les champs de date et d'heure
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="date"]').min = today;
+});
+</script>
+{% endblock %} 

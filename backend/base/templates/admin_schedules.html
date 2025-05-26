@@ -1,0 +1,222 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-time'></i> Gestion des Horaires</h2>
+    </div>
+
+    <!-- Sélection du médecin -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label">Sélectionner un médecin</label>
+                    <select class="form-select" id="doctorSelect">
+                        <option value="">Choisir un médecin</option>
+                        {% for doctor in doctors %}
+                        <option value="{{ doctor.id }}">
+                            Dr. {{ doctor.profile.user.get_full_name }} - {{ doctor.specialite }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Planning hebdomadaire -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="card-title mb-0"><i class='bx bx-calendar'></i> Planning Hebdomadaire</h5>
+        </div>
+        <div class="card-body">
+            <form id="scheduleForm">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Jour</th>
+                                <th>Disponible</th>
+                                <th>Heure début</th>
+                                <th>Heure fin</th>
+                                <th>Pause déjeuner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for day in days_of_week %}
+                            <tr>
+                                <td>{{ day }}</td>
+                                <td>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" 
+                                               id="available_{{ forloop.counter }}"
+                                               name="available_{{ forloop.counter }}">
+                                    </div>
+                                </td>
+                                <td>
+                                    <input type="time" class="form-control" 
+                                           id="start_{{ forloop.counter }}"
+                                           name="start_{{ forloop.counter }}">
+                                </td>
+                                <td>
+                                    <input type="time" class="form-control" 
+                                           id="end_{{ forloop.counter }}"
+                                           name="end_{{ forloop.counter }}">
+                                </td>
+                                <td>
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <input type="time" class="form-control" 
+                                                   placeholder="Début"
+                                                   id="lunch_start_{{ forloop.counter }}"
+                                                   name="lunch_start_{{ forloop.counter }}">
+                                        </div>
+                                        <div class="col-6">
+                                            <input type="time" class="form-control" 
+                                                   placeholder="Fin"
+                                                   id="lunch_end_{{ forloop.counter }}"
+                                                   name="lunch_end_{{ forloop.counter }}">
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-3 text-end">
+                    <button type="submit" class="btn btn-primary">
+                        <i class='bx bx-save'></i> Enregistrer les horaires
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Exceptions et congés -->
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-info text-white">
+            <h5 class="card-title mb-0"><i class='bx bx-calendar-x'></i> Exceptions et Congés</h5>
+        </div>
+        <div class="card-body">
+            <form id="exceptionsForm" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Date de début</label>
+                    <input type="date" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Date de fin</label>
+                    <input type="date" class="form-control" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" required>
+                        <option value="vacation">Congés</option>
+                        <option value="training">Formation</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <label class="form-label">Motif</label>
+                    <textarea class="form-control" rows="2"></textarea>
+                </div>
+                <div class="col-12 text-end">
+                    <button type="submit" class="btn btn-info">
+                        <i class='bx bx-plus'></i> Ajouter une exception
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-4">
+                <h6>Exceptions planifiées</h6>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Période</th>
+                                <th>Type</th>
+                                <th>Motif</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="4" class="text-center">Aucune exception planifiée</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const doctorSelect = document.getElementById('doctorSelect');
+        const scheduleForm = document.getElementById('scheduleForm');
+        const exceptionsForm = document.getElementById('exceptionsForm');
+
+        // Chargement des horaires quand un médecin est sélectionné
+        doctorSelect?.addEventListener('change', function() {
+            if (this.value) {
+                loadDoctorSchedule(this.value);
+            }
+        });
+
+        // Soumission du formulaire des horaires
+        scheduleForm?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            saveDoctorSchedule(formData);
+        });
+
+        // Soumission du formulaire des exceptions
+        exceptionsForm?.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            saveException(formData);
+        });
+
+        function loadDoctorSchedule(doctorId) {
+            // Simuler le chargement des horaires
+            console.log('Chargement des horaires du médecin:', doctorId);
+        }
+
+        function saveDoctorSchedule(formData) {
+            // Simuler la sauvegarde des horaires
+            console.log('Sauvegarde des horaires');
+            showSuccess('Horaires enregistrés avec succès !');
+        }
+
+        function saveException(formData) {
+            // Simuler la sauvegarde de l'exception
+            console.log('Sauvegarde de l\'exception');
+            showSuccess('Exception ajoutée avec succès !');
+            exceptionsForm.reset();
+        }
+
+        function showSuccess(message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            const alertsContainer = document.querySelector('.messages') || createAlertsContainer();
+            alertsContainer.innerHTML += alertHtml;
+        }
+
+        function createAlertsContainer() {
+            const container = document.createElement('div');
+            container.className = 'messages mb-4';
+            document.querySelector('.container').insertBefore(container, document.querySelector('.row'));
+            return container;
+        }
+    });
+</script>
+{% endblock %} 

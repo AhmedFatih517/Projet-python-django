@@ -1,0 +1,158 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dossiers Médicaux - Medicare+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-folder-open"></i> Dossiers Médicaux</h1>
+        <p class="subtitle">Dr. {{ medecin_info.profile.user.get_full_name }}</p>
+    </div>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="patients-list">
+        {% if patients %}
+            {% for patient in patients %}
+            <div class="patient-card">
+                <div class="patient-info">
+                    <h3>{{ patient.profile.user.get_full_name }}</h3>
+                    <p class="patient-details">
+                        <span><i class="fas fa-envelope"></i> {{ patient.profile.user.email }}</span>
+                        {% if patient.profile.telephone %}
+                        <span><i class="fas fa-phone"></i> {{ patient.profile.telephone }}</span>
+                        {% endif %}
+                    </p>
+                </div>
+                <div class="patient-actions">
+                    <a href="{% url 'dossier_medical_patient' patient.profile.user.username %}" class="btn-action">
+                        <i class="fas fa-folder-open"></i> Voir le dossier
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-users"></i>
+                <p>Aucun patient trouvé</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.page-header {
+    margin-bottom: 2rem;
+}
+
+.page-header h1 {
+    font-size: 2rem;
+    color: #2d3748;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.subtitle {
+    color: #718096;
+    margin-top: 0.5rem;
+}
+
+.patients-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.patient-card {
+    background: white;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.patient-info h3 {
+    color: #2d3748;
+    margin-bottom: 0.5rem;
+}
+
+.patient-details {
+    display: flex;
+    gap: 1rem;
+    color: #718096;
+    font-size: 0.875rem;
+}
+
+.patient-details span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.btn-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    background-color: #4299e1;
+    color: white;
+    border-radius: 0.375rem;
+    text-decoration: none;
+    transition: background-color 0.2s;
+}
+
+.btn-action:hover {
+    background-color: #3182ce;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 3rem;
+    color: #a0aec0;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 768px) {
+    .patient-card {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .patient-details {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .patient-actions {
+        width: 100%;
+    }
+
+    .btn-action {
+        width: 100%;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %} 

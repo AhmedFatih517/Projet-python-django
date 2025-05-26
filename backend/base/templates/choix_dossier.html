@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Choisissez le type de dossier médical sur MediCare+ : classique ou journalier." />
+    <meta name="author" content="MediCare+" />
+    <title>Choix du Dossier Médical | MediCare+</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --accent-color: #6c757d;
+            --background-light: #f8f9fa;
+            --background-white: #ffffff;
+            --text-dark: #343a40;
+            --text-light: #ffffff;
+            --border-color: #dee2e6;
+            --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.07);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.12);
+            --border-radius: 0.5rem;
+            --transition-speed-normal: 0.3s;
+            --transition-speed-fast: 0.15s; /* Pour effets rapides comme :active */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        header .logo {
+            font-size: clamp(1.6rem, 2.5vw, 2rem);
+            font-weight: 700;
+            color: #a81313;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+        header .logo i {
+            color: #a81313;
+            /* Animation pulse modifiée pour être plus subtile */
+            animation: gentlePulse 2s infinite ease-in-out;
+        }
+        @keyframes gentlePulse { /* Animation plus douce */
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.08); }
+        }
+        header nav ul { list-style: none; display: flex; gap: 0.8rem; padding: 0; margin: 0; }
+        header nav ul li a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-speed-normal) ease, color var(--transition-speed-normal) ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        header nav ul li a i {
+             color: var(--primary-color);
+             font-size: 1.1em;
+             transition: color var(--transition-speed-normal) ease;
+        }
+        header nav ul li a:hover, header nav ul li a.active {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+        }
+         header nav ul li a:hover i { color: var(--text-light); }
+         header nav ul li a:focus-visible {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+            background-color: var(--medium-gray); /* Léger fond au focus clavier */
+         }
+
+        /* --- Main Content --- */
+        main[role="main"] {
+            flex: 1;
+            padding: 3.5rem 1rem;
+            text-align: center;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            font-size: clamp(2rem, 4vw, 2.8rem);
+            font-weight: 600;
+            margin-bottom: 3.5rem;
+        }
+
+        .card-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2.5rem;
+        }
+
+        /* --- Card Styling --- */
+        .card {
+            background-color: var(--background-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-md);
+            padding: 2.5rem;
+            width: clamp(280px, 40vw, 350px);
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            /* Ajout de transform et box-shadow à la transition de base */
+            transition: transform var(--transition-speed-normal) ease,
+                        box-shadow var(--transition-speed-normal) ease,
+                        border-color var(--transition-speed-normal) ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 2px solid transparent;
+            opacity: 0;
+            animation: fadeInUp 0.6s ease-out forwards;
+        }
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.25s; }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card:hover,
+        .card:focus-visible {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg); /* Ombre plus prononcée */
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        /* Feedback au clic */
+        .card:active {
+             transform: translateY(-2px) scale(0.98); /* Effet d'appui */
+             box-shadow: var(--shadow-md); /* Retour à l'ombre normale */
+             /* Transition rapide pour l'effet d'appui */
+             transition: transform var(--transition-speed-fast) ease,
+                         box-shadow var(--transition-speed-fast) ease;
+        }
+
+
+        .card i {
+            font-size: 3.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            transition: transform var(--transition-speed-normal) ease, color var(--transition-speed-normal) ease;
+        }
+        .card:hover i,
+        .card:focus-visible i { /* Applique aussi au focus */
+             transform: scale(1.1);
+             color: var(--primary-hover-color);
+        }
+
+        .card h2 {
+            font-size: 1.3rem;
+            margin-bottom: 0.8rem;
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+
+        .card .card-description {
+             font-size: 0.95rem;
+             color: var(--accent-color);
+             line-height: 1.5;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: #e9ecef;
+            padding: 20px;
+            text-align: center;
+            color: var(--dark-gray);
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.9rem;
+        }
+        footer .social-icons a {
+             margin: 0 10px;
+             color: var(--primary-color);
+             font-size: 20px;
+             transition: color var(--transition-speed-fast) ease, transform var(--transition-speed-fast) ease;
+        }
+        footer .social-icons a:hover { color: var(--primary-hover-color); transform: scale(1.2); }
+        footer .social-icons { margin-bottom: 10px; }
+        footer .copyright { font-size: 0.875em; }
+
+        /* --- Responsive --- */
+        @media (max-width: 700px) {
+            .card-container { gap: 1.5rem; }
+            .card { width: 85%; padding: 2rem; }
+            main { padding: 2.5rem 1rem; }
+            h1 { margin-bottom: 2.5rem; }
+        }
+         @media (max-width: 480px) {
+             header { padding: 0.8rem 1rem; flex-direction: column; gap: 0.5rem; }
+             header nav ul { gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+             header nav ul li a { padding: 0.5rem 0.8rem; font-size: 0.9rem;}
+             .card { width: 95%; }
+             main { padding: 2rem 0.5rem; }
+             h1 { font-size: 1.8rem; }
+         }
+
+        /* --- Accessibilité: Réduction des Mouvements --- */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; } /* Désactive défilement doux */
+
+            /* Désactive animations principales */
+            .card, header .logo i {
+                animation: none;
+                opacity: 1; /* Assure visibilité si animation jouait sur opacity */
+                transform: none; /* Reset transform initial si animation jouait dessus */
+            }
+
+            /* Désactive transitions principales */
+            .card, .card i, header nav ul li a, footer .social-icons a {
+                transition: none;
+            }
+
+            /* Enlève les transformations au survol/focus/active */
+            .card:hover,
+            .card:focus-visible,
+            .card:active {
+                transform: none;
+            }
+            header nav ul li a:hover, footer .social-icons a:hover {
+                 transform: none; /* Si d'autres transforms existent */
+            }
+            /* Garde un feedback de focus minimaliste */
+            .card:focus-visible {
+                 border-color: var(--primary-color);
+            }
+            header nav ul li a:focus-visible {
+                 background-color: var(--medium-gray);
+            }
+        }
+
+    </style>
+</head>
+
+<body>
+
+    <header role="banner">
+        <a href="{% url 'index' %}" class="logo" aria-label="Accueil MediCare+">
+            <i class="fas fa-heartbeat" aria-hidden="true"></i> MEDICARE+
+        </a>
+
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'medecin_view' %}" class="active"><i class="fas fa-tachometer-alt" aria-hidden="true"></i> Tableau de bord</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main role="main">
+        <h1>Choisir le type de dossier médical</h1>
+
+        <section class="card-container" aria-label="Choix du type de dossier">
+            <a href="{% url 'dossier_consultation' %}" class="card" tabindex="0" aria-labelledby="card-title-classique">
+                <i class="fas fa-folder-open" aria-hidden="true"></i>
+                <h2 id="card-title-classique">Dossier Médical Classique</h2>
+                <p class="card-description">
+                    Accédez à l'historique complet des consultations, antécédents et documents du patient.
+                </p>
+            </a>
+
+            <a href="{% url 'dossier_journalier' %}" class="card" tabindex="0" aria-labelledby="card-title-journalier">
+                <i class="fas fa-chart-line" aria-hidden="true"></i>
+                <h2 id="card-title-journalier">Dossier Médical Journalier</h2>
+                <p class="card-description">
+                    Visualisez les constantes, événements et notes spécifiques enregistrés au jour le jour.
+                </p>
+            </a>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Visitez notre Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Visitez notre Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="Visitez notre LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Visitez notre Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <script>
+        // Script pour mettre à jour l'année du copyright
+        document.addEventListener('DOMContentLoaded', () => {
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+        });
+    </script>
+</body>
+</html>

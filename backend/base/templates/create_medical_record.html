@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Création Dossier Médical - MediCare+</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --success-color: #28a745;
+            --success-hover-color: #218838;
+            --text-dark: #343a40;
+            --text-light: #ffffff;
+            --background-light: #f4f7fc;
+            --background-white: #ffffff;
+            --border-color: #ced4da;
+            --border-color-focus: var(--success-color);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 5px 15px rgba(0,0,0,0.08);
+            --border-radius: 0.5rem;
+            --input-padding-y: 0.75rem;
+            --input-padding-x: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            line-height: 1.65;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        header .logo {
+            font-size: clamp(1.6rem, 2.5vw, 2rem);
+            font-weight: 700;
+            color: #a81313;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+        header .logo i { color: #a81313; }
+        header nav ul { list-style: none; display: flex; gap: 0.8rem; padding: 0; margin: 0; }
+        header nav ul li a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        header nav ul li a i { color: var(--primary-color); font-size: 1.1em; }
+        header nav ul li a:hover {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            transform: scale(1.05);
+        }
+        header nav ul li a:hover i { color: var(--text-light); }
+        header nav ul li a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+        /* --- Main Content --- */
+        main {
+            flex-grow: 1;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 2.5rem;
+            font-size: 2.2em;
+        }
+
+        /* --- Form --- */
+        .form-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: var(--background-white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .form-group textarea {
+            width: 100%;
+            padding: var(--input-padding-y) var(--input-padding-x);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--border-color-focus);
+        }
+
+        .btn-submit {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            background-color: var(--success-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: var(--success-hover-color);
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--background-white);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--dark-gray);
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+        }
+        footer .social-icons a {
+            margin: 0 10px;
+            color: var(--primary-color);
+            font-size: 1.25rem;
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+        footer .social-icons a:hover { 
+            color: var(--primary-hover-color); 
+            transform: scale(1.15); 
+        }
+        footer .social-icons { margin-bottom: 0.75rem; }
+        footer .copyright { font-size: 0.9em; }
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            .form-container {
+                padding: 1rem;
+            }
+            h1 { font-size: 1.8em; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            * { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="{% url 'index' %}" class="logo" aria-label="Accueil MediCare+">
+            <i class="fas fa-heartbeat" aria-hidden="true"></i> MEDICARE+
+        </a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'medecin_view' %}"><i class="fas fa-user" aria-hidden="true"></i> Mon espace</a></li>
+                <li><a href="{% url 'logout' %}"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Création du Dossier Médical</h1>
+
+        <div class="form-container">
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.diagnosis.id_for_label }}">
+                        <i class="fas fa-stethoscope"></i> Diagnostic
+                    </label>
+                    {{ form.diagnosis }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.antecedents.id_for_label }}">
+                        <i class="fas fa-history"></i> Antécédents
+                    </label>
+                    {{ form.antecedents }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.allergies.id_for_label }}">
+                        <i class="fas fa-allergies"></i> Allergies
+                    </label>
+                    {{ form.allergies }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.medications.id_for_label }}">
+                        <i class="fas fa-pills"></i> Médicaments
+                    </label>
+                    {{ form.medications }}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.observations.id_for_label }}">
+                        <i class="fas fa-clipboard-list"></i> Observations
+                    </label>
+                    {{ form.observations }}
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-save"></i> Enregistrer le dossier
+                </button>
+            </form>
+        </div>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <script>
+        // Mise à jour de l'année du copyright
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+    </script>
+</body>
+</html> 

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Prendre un Rendez-vous - Medicare+</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --main-color: #4CAF50;
+            --secondary-color: #f4f4f9;
+            --text-color: #333;
+            --card-bg: #fff;
+            --radius: 16px;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--secondary-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: #fff;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            color: #e74c3c;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            padding: 0 1rem;
+        }
+
+        .appointment-form {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--main-color);
+            box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
+        }
+
+        .select2-container--default .select2-selection--single {
+            height: 45px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 45px;
+            padding-left: 15px;
+        }
+
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 43px;
+        }
+
+        .btn-submit {
+            background-color: var(--main-color);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-submit:hover {
+            background-color: #3d8b40;
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <a href="{% url 'patient_view' %}" class="logo">Medicare+</a>
+    </div>
+
+    <div class="container">
+        <div class="appointment-form">
+            <h2>Prendre un Rendez-vous</h2>
+            
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="{% if message.tags == 'success' %}success-message{% endif %}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="{{ form.doctor.id_for_label }}">Médecin</label>
+                    {{ form.doctor }}
+                    {% if form.doctor.errors %}
+                        <div class="error-message">{{ form.doctor.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.date.id_for_label }}">Date</label>
+                    {{ form.date }}
+                    {% if form.date.errors %}
+                        <div class="error-message">{{ form.date.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.time.id_for_label }}">Heure</label>
+                    {{ form.time }}
+                    {% if form.time.errors %}
+                        <div class="error-message">{{ form.time.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.reason.id_for_label }}">Motif du rendez-vous</label>
+                    {{ form.reason }}
+                    {% if form.reason.errors %}
+                        <div class="error-message">{{ form.reason.errors }}</div>
+                    {% endif %}
+                </div>
+
+                <button type="submit" class="btn-submit">Prendre Rendez-vous</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('.select2').select2({
+                theme: 'default',
+                width: '100%',
+                placeholder: 'Sélectionnez un médecin'
+            });
+        });
+    </script>
+</body>
+</html> 

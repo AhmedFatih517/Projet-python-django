@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Espace Patient - Medicare+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2><i class="fas fa-user"></i> Espace Patient</h2>
+
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="dashboard-cards">
+        <!-- Carte Rendez-vous -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-calendar-check"></i>
+            </div>
+            <h2>Mes Rendez-vous</h2>
+            <p class="card-description">Gérez vos rendez-vous médicaux.</p>
+            <a href="{% url 'mes_rdv' %}" class="btn-card-action">
+                Voir mes rendez-vous <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Carte Ordonnances -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-prescription-bottle-alt"></i>
+            </div>
+            <h2>Mes Ordonnances</h2>
+            <p class="card-description">Accédez à vos ordonnances médicales.</p>
+            <a href="{% url 'ordonnances_patient' %}" class="btn-card-action">
+                Voir mes ordonnances <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Carte Journal de Santé -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-notes-medical"></i>
+            </div>
+            <h2>Journal de Santé</h2>
+            <p class="card-description">Suivez votre état de santé au quotidien.</p>
+            <a href="{% url 'journal_sante' %}" class="btn-card-action">
+                Voir mon journal <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+
+        <!-- Carte Dossier Médical -->
+        <section class="dashboard-card">
+            <div class="card-icon">
+                <i class="fas fa-file-medical"></i>
+            </div>
+            <h2>Dossier Médical</h2>
+            <p class="card-description">Consultez votre dossier médical complet.</p>
+            <a href="{% url 'dossier_medical' %}" class="btn-card-action">
+                Voir mon dossier <i class="fas fa-arrow-right"></i>
+            </a>
+        </section>
+    </div>
+</div>
+{% endblock %}

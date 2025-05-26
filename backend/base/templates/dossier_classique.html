@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dossier Médical - MediCare+</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* --- Global Styles & Variables --- */
+        :root {
+            --primary-color: #007bff;
+            --primary-hover-color: #0056b3;
+            --success-color: #28a745;
+            --success-hover-color: #218838;
+            --text-dark: #343a40;
+            --text-light: #ffffff;
+            --background-light: #f4f7fc; /* Fond de page un peu plus doux */
+            --background-white: #ffffff;
+            --border-color: #ced4da;
+            --border-color-focus: var(--success-color); /* Changé pour le vert succès */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 5px 15px rgba(0,0,0,0.08);
+            --border-radius: 0.5rem; /* 8px */
+            --input-padding-y: 0.75rem;
+            --input-padding-x: 1rem;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--background-light);
+            color: var(--text-dark);
+            line-height: 1.65; /* Légèrement augmenté pour lisibilité */
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-white);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color);
+        }
+        header .logo {
+            font-size: clamp(1.6rem, 2.5vw, 2rem);
+            font-weight: 700;
+            color: #a81313;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.7rem;
+            text-decoration: none;
+        }
+        header .logo i { color: #a81313; }
+        header nav ul { list-style: none; display: flex; gap: 0.8rem; padding: 0; margin: 0; }
+        header nav ul li a {
+            color: var(--text-dark);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+        header nav ul li a i { color: var(--primary-color); font-size: 1.1em; }
+        header nav ul li a:hover {
+            background-color: var(--primary-color);
+            color: var(--text-light);
+            transform: scale(1.05); /* Correction du scale */
+        }
+        header nav ul li a:hover i { color: var(--text-light); }
+        header nav ul li a:focus-visible { outline: 2px solid var(--primary-color); outline-offset: 2px; }
+
+        /* --- Main Content --- */
+        main {
+            flex-grow: 1;
+            padding: 2rem 1rem;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color); /* Titre principal en bleu */
+            font-weight: 600;
+            margin-bottom: 2.5rem;
+            font-size: 2.2em;
+        }
+
+        /* --- Form Styling --- */
+        form#dossierForm {
+            margin: 20px auto;
+            max-width: 800px; /* Légèrement plus large pour confort */
+            background-color: var(--background-white);
+            padding: 25px 30px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-md);
+            transition: box-shadow 0.3s ease;
+        }
+        form#dossierForm:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        fieldset {
+            border: 1px solid #e0e0e0; /* Bordure plus subtile */
+            border-radius: var(--border-radius);
+            padding: 1.5rem 2rem; /* Padding ajusté */
+            margin-bottom: 2.5rem; /* Plus d'espace entre fieldsets */
+            background-color: #fdfdfd;
+        }
+        legend {
+            font-size: 1.3em; /* Taille augmentée */
+            font-weight: 600;
+            color: var(--primary-hover-color); /* Bleu plus foncé */
+            padding: 0 0.75rem;
+            margin-left: 0.5rem;
+        }
+
+        .form-group { /* Ajout d'un conteneur pour label + input si besoin de layout plus complexe */
+             margin-bottom: 1.25rem;
+        }
+
+        form label {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem; /* Espace entre icône et texte du label */
+            margin-bottom: 0.6rem;
+            margin-top: 1rem;
+            font-size: 1rem;
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+        form label i {
+            color: var(--primary-color); /* Icônes en bleu primaire */
+            font-size: 1.1rem;
+            width: 20px; /* Largeur fixe pour alignement */
+            text-align: center;
+        }
+
+        form input[type="text"],
+        form textarea,
+        form select {
+            width: 100%;
+            padding: var(--input-padding-y) var(--input-padding-x);
+            margin-top: 0.25rem; /* Léger espace après le label si input sur nouvelle ligne */
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            font-size: 1rem;
+            color: var(--text-dark);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background-color: var(--background-white); /* Assure fond blanc */
+        }
+
+        form input[type="text"]:focus,
+        form textarea:focus,
+        form select:focus {
+            border-color: var(--border-color-focus);
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.2); /* Ombre de focus verte */
+        }
+        /* Style placeholder */
+        form ::placeholder {
+             color: #adb5bd;
+             opacity: 1;
+        }
+
+        form textarea {
+            min-height: 100px; /* Hauteur minimale */
+            resize: vertical;
+        }
+        /* Amélioration style select pour flèche custom */
+        form select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right var(--input-padding-x) center;
+            background-size: 16px 12px;
+            padding-right: calc(var(--input-padding-x) * 2.5); /* Espace pour la flèche */
+        }
+
+
+        button[type="submit"] { /* Ciblage plus précis */
+            padding: 0.8rem 1.8rem; /* Padding ajusté */
+            background-color: var(--success-color);
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1.05rem; /* Taille ajustée */
+            font-weight: 500;
+            transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.15s ease;
+            margin-top: 1.5rem; /* Espace avant bouton */
+            display: inline-flex; /* Pour icône */
+            align-items: center;
+            gap: 0.5rem;
+        }
+        button[type="submit"]:hover {
+            background-color: var(--success-hover-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        button[type="submit"]:active {
+            background-color: #1e7e34; /* Vert encore plus foncé */
+            transform: translateY(0);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+        }
+
+        /* --- Affichage Dossier --- */
+        #dossierAffiche {
+            margin-top: 2.5rem; /* Plus d'espace avant */
+            padding: 25px 30px; /* Padding ajusté */
+            background-color: var(--background-white);
+            border: 1px solid var(--border-color);
+            border-radius: 12px; /* Cohérent avec formulaire */
+            box-shadow: var(--shadow-sm); /* Ombre plus subtile */
+            max-width: 800px; /* Cohérent avec formulaire */
+            margin-left: auto;
+            margin-right: auto;
+            transition: box-shadow 0.3s ease;
+        }
+        #dossierAffiche h2 { /* Titre pour la section d'affichage */
+            color: var(--primary-hover-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.4em;
+        }
+        #dossierAffiche p {
+            font-size: 1rem; /* Taille ajustée */
+            margin-bottom: 0.75rem; /* Espacement ajusté */
+            color: #555;
+            line-height: 1.7; /* Lisibilité accrue */
+        }
+        #dossierAffiche p .highlight { /* Utilisation d'une classe pour le label affiché */
+            font-weight: 600;
+            color: var(--text-dark); /* Labels affichés en couleur texte standard */
+            margin-right: 0.5rem;
+        }
+        #dossierAffiche p:last-child {
+             margin-bottom: 0;
+        }
+
+        /* --- Footer --- */
+        footer {
+            background-color: var(--background-white); /* Cohérence */
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--dark-gray);
+            margin-top: auto;
+            border-top: 1px solid var(--border-color);
+        }
+        footer .social-icons a {
+             margin: 0 10px;
+             color: var(--primary-color);
+             font-size: 1.25rem; /* Taille ajustée */
+             transition: color 0.2s ease, transform 0.2s ease;
+        }
+        footer .social-icons a:hover { color: var(--primary-hover-color); transform: scale(1.15); }
+        footer .social-icons { margin-bottom: 0.75rem; }
+        footer .copyright { font-size: 0.9em; }
+
+
+        /* --- Toast Notification --- */
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: var(--border-radius);
+            padding: 1rem 1.5rem;
+            position: fixed;
+            z-index: 101; /* Au-dessus du header sticky */
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%) translateY(20px); /* Position initiale pour animation */
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .toast.success { background-color: var(--success-color); }
+        .toast.error { background-color: var(--danger-color); }
+
+
+        /* --- Responsive --- */
+        @media (max-width: 768px) {
+            form#dossierForm, #dossierAffiche {
+                padding: 20px;
+                max-width: 95%; /* Prend plus de largeur */
+                margin-left: auto;
+                margin-right: auto;
+            }
+            fieldset { padding: 1rem; }
+            legend { font-size: 1.15em; }
+            button[type="submit"] { padding: 0.7rem 1.5rem; width: 100%; /* Bouton pleine largeur sur mobile */ }
+            h1 { font-size: 1.8em; }
+        }
+         @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            * { animation: none !important; transition: none !important; }
+         }
+
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="{% url 'index' %}" class="logo" aria-label="Accueil MediCare+">
+            <i class="fas fa-heartbeat" aria-hidden="true"></i> MEDICARE+
+        </a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'patient' %}"><i class="fas fa-user" aria-hidden="true"></i> Mon espace</a></li>
+                <li><a href="{% url 'index' %}"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <h1>Création du Dossier Médical</h1>
+
+        <form id="dossierForm">
+            <fieldset>
+                <legend><i class="fas fa-id-card-alt"></i> Informations Générales</legend>
+                <div class="form-group">
+                    <label for="genre"><i class="fas fa-venus-mars" aria-hidden="true"></i>Genre :</label>
+                    <select id="genre" name="genre" required>
+                        <option value="Homme">Homme</option>
+                        <option value="Femme">Femme</option>
+                        <option value="Autre">Autre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="groupeSanguin"><i class="fas fa-tint" aria-hidden="true"></i>Groupe Sanguin :</label>
+                    <select id="groupeSanguin" name="groupeSanguin" required>
+                        <option value="">Sélectionner...</option>
+                        <option value="O+">O+</option><option value="O-">O-</option>
+                        <option value="A+">A+</option><option value="A-">A-</option>
+                        <option value="B+">B+</option><option value="B-">B-</option>
+                        <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend><i class="fas fa-history"></i> Antécédents et Allergies</legend>
+                <div class="form-group">
+                    <label for="allergies"><i class="fas fa-allergies" aria-hidden="true"></i>Allergies :</label>
+                    <input type="text" id="allergies" name="allergies" placeholder="Ex: Pollen, Pénicilline" required>
+                </div>
+                <div class="form-group">
+                    <label for="antécédents"><i class="fas fa-notes-medical" aria-hidden="true"></i>Antécédents Médicaux :</label>
+                    <textarea id="antécédents" name="antécédents" placeholder="Ex: Asthme, Hypertension" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="chirurgies"><i class="fas fa-briefcase-medical" aria-hidden="true"></i>Chirurgies Passées :</label>
+                    <textarea id="chirurgies" name="chirurgies" placeholder="Ex: Appendicectomie (2010)" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="vaccinations"><i class="fas fa-syringe" aria-hidden="true"></i>Vaccinations :</label>
+                    <textarea id="vaccinations" name="vaccinations" placeholder="Ex: Tétanos (2022), Grippe (annuel)" required></textarea>
+                </div>
+                 <div class="form-group">
+                    <label for="antécédentsFamiliaux"><i class="fas fa-users" aria-hidden="true"></i>Antécédents Familiaux :</label>
+                    <textarea id="antécédentsFamiliaux" name="antécédentsFamiliaux" placeholder="Ex: Diabète (mère), Maladies cardiaques (père)"></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend><i class="fas fa-pills"></i> État Actuel et Traitements</legend>
+                <div class="form-group">
+                    <label for="medicaments"><i class="fas fa-capsules" aria-hidden="true"></i>Médicaments Actuels :</label>
+                    <input type="text" id="medicaments" name="medicaments" placeholder="Ex: Paracétamol 500mg, Insuline" required>
+                </div>
+                <div class="form-group">
+                    <label for="etatGeneral"><i class="fas fa-stethoscope" aria-hidden="true"></i>État de Santé Général :</label>
+                    <textarea id="etatGeneral" name="etatGeneral" placeholder="Ex: Bon état général, Fatigué récemment" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="symptomesRecents"><i class="fas fa-head-side-cough" aria-hidden="true"></i>Symptômes Récents :</label>
+                    <textarea id="symptomesRecents" name="symptomesRecents" placeholder="Ex: Maux de tête, Toux légère" required></textarea>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend><i class="fas fa-person-running"></i> Habitudes de Vie</legend>
+                <div class="form-group">
+                    <label for="habitudesVie"><i class="fas fa-apple-alt" aria-hidden="true"></i>Habitudes de Vie :</label>
+                    <textarea id="habitudesVie" name="habitudesVie" placeholder="Ex: Sport 3x/semaine, Régime végétarien"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="fumeur"><i class="fas fa-smoking" aria-hidden="true"></i>Fumeur :</label>
+                    <select id="fumeur" name="fumeur" required>
+                        <option value="Non">Non</option>
+                        <option value="Oui - Occasionnel">Oui - Occasionnel</option>
+                        <option value="Oui - Régulier">Oui - Régulier</option>
+                        <option value="Ancien fumeur">Ancien fumeur</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="alcohol"><i class="fas fa-wine-glass" aria-hidden="true"></i>Consommation d'Alcool :</label>
+                    <select id="alcohol" name="alcohol" required>
+                        <option value="Non">Non</option>
+                        <option value="Occasionnelle">Occasionnelle</option>
+                        <option value="Modérée">Modérée</option>
+                        <option value="Régulière">Régulière</option>
+                    </select>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend><i class="fas fa-info-circle"></i> Informations Complémentaires</legend>
+                <div class="form-group">
+                    <label for="contactUrgence"><i class="fas fa-phone-volume" aria-hidden="true"></i>Contact d'Urgence :</label>
+                    <input type="text" id="contactUrgence" name="contactUrgence" placeholder="Nom - Relation - Téléphone" required>
+                </div>
+                <div class="form-group">
+                    <label for="autresObservations"><i class="far fa-comment-dots" aria-hidden="true"></i>Autres Observations :</label>
+                    <textarea id="autresObservations" name="autresObservations" placeholder="Autres informations importantes à noter"></textarea>
+                </div>
+            </fieldset>
+
+            <button type="submit"><i class="fas fa-save" aria-hidden="true"></i>Sauvegarder le Dossier</button>
+        </form>
+
+        <div id="dossierAffiche">
+             </div>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <div id="toast" class="toast">Message du Toast</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dossierForm = document.getElementById('dossierForm');
+            const dossierAffiche = document.getElementById('dossierAffiche');
+            const toast = document.getElementById('toast');
+            const DOSSIER_STORAGE_KEY = "dossierMedical_v2"; // Clé pour localStorage
+
+            let dossierMedical = {}; // Initialise comme objet vide
+
+            // Charge le dossier depuis localStorage au chargement de la page
+            loadDossier();
+            afficherDossier(); // Affiche le dossier chargé ou message par défaut
+
+            dossierForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+
+                // Collecte des données du formulaire
+                // NOTE : Les champs nom, prenom, dateNaissance ne sont pas dans le HTML du formulaire
+                // donc ils seront undefined ici et dans localStorage, ce qui affectera l'affichage.
+                dossierMedical = {
+                    // nom: document.getElementById('nom') ? document.getElementById('nom').value : undefined,
+                    // prenom: document.getElementById('prenom') ? document.getElementById('prenom').value : undefined,
+                    // dateNaissance: document.getElementById('dateNaissance') ? document.getElementById('dateNaissance').value : undefined,
+                    genre: document.getElementById('genre').value,
+                    allergies: document.getElementById('allergies').value,
+                    antécédents: document.getElementById('antécédents').value,
+                    medicaments: document.getElementById('medicaments').value,
+                    chirurgies: document.getElementById('chirurgies').value,
+                    vaccinations: document.getElementById('vaccinations').value,
+                    contactUrgence: document.getElementById('contactUrgence').value,
+                    etatGeneral: document.getElementById('etatGeneral').value,
+                    groupeSanguin: document.getElementById('groupeSanguin').value,
+                    symptomesRecents: document.getElementById('symptomesRecents').value,
+                    antécédentsFamiliaux: document.getElementById('antécédentsFamiliaux').value,
+                    habitudesVie: document.getElementById('habitudesVie').value,
+                    fumeur: document.getElementById('fumeur').value,
+                    alcohol: document.getElementById('alcohol').value,
+                    autresObservations: document.getElementById('autresObservations').value
+                };
+
+                saveDossier();
+                showToast("Dossier Médical Sauvegardé !", false, true); // Message de succès
+                afficherDossier();
+                // dossierForm.reset(); // Optionnel: vider le formulaire après sauvegarde
+            });
+
+            function afficherDossier() {
+                dossierAffiche.innerHTML = '<h2><i class="fas fa-file-medical-alt"></i> Dossier Médical Actuel</h2>'; // Titre pour la section
+                // Condition d'affichage modifiée pour vérifier si l'objet dossierMedical n'est pas vide,
+                // plutôt que de se baser sur dossierMedical.nom qui n'est pas saisissable.
+                if (Object.keys(dossierMedical).length > 0 && Object.values(dossierMedical).some(val => val !== '' && val !== undefined && val !== null)) {
+                    let htmlOutput = '';
+                    // Affichage des champs qui SONT dans le formulaire HTML
+                    // Les champs nom, prenom, dateNaissance ne seront pas affichés car non saisissables
+
+                    htmlOutput += `<p><span class="highlight">Genre :</span> ${escapeHTML(dossierMedical.genre) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Groupe Sanguin :</span> ${escapeHTML(dossierMedical.groupeSanguin) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Allergies :</span> ${escapeHTML(dossierMedical.allergies) || 'Aucune'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Antécédents Médicaux :</span> ${escapeHTML(dossierMedical.antécédents) || 'Aucun'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Médicaments Actuels :</span> ${escapeHTML(dossierMedical.medicaments) || 'Aucun'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Chirurgies Passées :</span> ${escapeHTML(dossierMedical.chirurgies) || 'Aucune'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Vaccinations :</span> ${escapeHTML(dossierMedical.vaccinations) || 'Aucune'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Contact d'Urgence :</span> ${escapeHTML(dossierMedical.contactUrgence) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">État de Santé Général :</span> ${escapeHTML(dossierMedical.etatGeneral) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Symptômes Récents :</span> ${escapeHTML(dossierMedical.symptomesRecents) || 'Aucun'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Antécédents Familiaux :</span> ${escapeHTML(dossierMedical.antécédentsFamiliaux) || 'Aucun'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Habitudes de Vie :</span> ${escapeHTML(dossierMedical.habitudesVie) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Fumeur :</span> ${escapeHTML(dossierMedical.fumeur) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Consommation d'Alcool :</span> ${escapeHTML(dossierMedical.alcohol) || 'Non renseigné'}</p>`;
+                    htmlOutput += `<p><span class="highlight">Autres Observations :</span> ${escapeHTML(dossierMedical.autresObservations) || 'Aucune'}</p>`;
+
+                    dossierAffiche.innerHTML += htmlOutput;
+                } else {
+                    dossierAffiche.innerHTML += "<p>Aucune information de dossier médical à afficher. Veuillez remplir et sauvegarder le formulaire.</p>";
+                }
+            }
+
+            function saveDossier() {
+                try {
+                    localStorage.setItem(DOSSIER_STORAGE_KEY, JSON.stringify(dossierMedical));
+                } catch (error) {
+                    console.error("Erreur lors de la sauvegarde dans localStorage:", error);
+                    showToast("Erreur de sauvegarde du dossier.", true); // true = isError
+                }
+            }
+
+            function loadDossier() {
+                try {
+                    const storedDossier = localStorage.getItem(DOSSIER_STORAGE_KEY);
+                    if (storedDossier) {
+                        const parsedDossier = JSON.parse(storedDossier);
+                        if (typeof parsedDossier === 'object' && parsedDossier !== null) {
+                            dossierMedical = parsedDossier;
+                        } else {
+                            dossierMedical = {}; // Réinitialise si données invalides
+                        }
+                    } else {
+                        dossierMedical = {}; // Pas de dossier stocké
+                    }
+                } catch (error) {
+                    console.error("Erreur lors du chargement depuis localStorage:", error);
+                    dossierMedical = {};
+                    showToast("Erreur de chargement du dossier existant.", true);
+                }
+            }
+
+            let toastTimeout;
+            function showToast(message, isError = false, isSuccess = false) {
+                clearTimeout(toastTimeout);
+                toast.textContent = message;
+                toast.className = 'toast show'; // Reset classes
+                if (isError) { toast.classList.add('error'); }
+                else if (isSuccess) { toast.classList.add('success'); }
+
+                toastTimeout = setTimeout(() => {
+                    toast.classList.remove('show');
+                }, 3000);
+            }
+
+            function escapeHTML(str) {
+                if (typeof str !== 'string') return str;
+                return str.replace(/&/g, '&amp;')
+                          .replace(/</g, '&lt;')
+                          .replace(/>/g, '&gt;')
+                          .replace(/"/g, '&quot;')
+                          .replace(/'/g, '&#039;');
+            }
+
+            // Mise à jour de l'année du copyright
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) {
+                currentYearSpan.textContent = new Date().getFullYear();
+            }
+        });
+    </script>
+</body>
+</html>

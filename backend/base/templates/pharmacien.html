@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="fr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Espace Pharmacien - MediCare+</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+    <style>
+        /* --- Thème Vert et Bleu (Professionnel et Épuré) --- */
+        :root {
+            --font-family-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            
+            /* Couleurs primaires et d'accentuation */
+            --main-green: #4CAF50;
+            --main-green-hover: #45a049;
+            --accent-blue: #2196F3;
+            --accent-blue-hover: #1976D2;
+            
+            /* Couleurs neutres et de texte */
+            --text-primary: #1f2937;
+            --text-secondary: #4b5563;
+            --text-muted: #6b7280;
+            --text-light: #ffffff;
+            
+            /* Fonds et Bordures */
+            --background-body: #f4f6f9;
+            --background-card: #ffffff;
+            --border-color-soft: #e5e7eb;
+            --border-color-input: #d1d5db;
+            
+            /* Couleurs de statut */
+            --success-color: var(--main-green);
+            --warning-color: #ffc107;
+            --danger-color: #ef4444;
+            
+            /* Identité de marque */
+            --brand-red: #a81313;
+            
+            /* Autres */
+            --shadow-color-base: rgba(45, 55, 72, 0.06);
+            --shadow-sm: 0 1px 2px 0 var(--shadow-color-base);
+            --shadow-md: 0 4px 6px -1px var(--shadow-color-base), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --border-radius: 6px;
+            --border-radius-lg: 8px;
+            --transition-main: 0.2s ease-in-out;
+            --input-padding-y: 0.7rem;
+            --input-padding-x: 0.9rem;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-family-main);
+            background-color: var(--background-body);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        /* --- Header --- */
+        header[role="banner"] {
+            background: var(--background-card);
+            padding: 0.9rem 2.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow-sm);
+            border-bottom: 1px solid var(--border-color-soft);
+        }
+
+        header .logo {
+            font-size: 1.7rem;
+            font-weight: 700;
+            color: var(--brand-red);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.6rem;
+            text-decoration: none;
+        }
+
+        header .logo i { color: var(--brand-red); }
+
+        header nav ul {
+            list-style: none;
+            display: flex;
+            gap: 0.5rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        header nav ul li a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            padding: 0.6rem 1rem;
+            border-radius: var(--border-radius);
+            transition: background-color var(--transition-main), color var(--transition-main);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        header nav ul li a i {
+            color: var(--text-secondary);
+            font-size: 1em;
+            transition: color var(--transition-main);
+        }
+
+        header nav ul li a:hover,
+        header nav ul li a.active {
+            background-color: var(--main-green);
+            color: var(--text-light);
+        }
+
+        header nav ul li a:hover i,
+        header nav ul li a.active i {
+            color: var(--text-light);
+        }
+
+        /* --- Main Content --- */
+        main.container {
+            flex: 1;
+            padding: 2.5rem 1.5rem;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        main > h1 {
+            text-align: center;
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: clamp(1.8rem, 4vw, 2.3rem);
+            margin-bottom: 2.5rem;
+        }
+
+        main > h1 i {
+            margin-right: 0.75rem;
+            color: var(--main-green);
+        }
+
+        .content-section {
+            background-color: var(--background-card);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color-soft);
+        }
+
+        .content-section h2 {
+            font-size: 1.4rem;
+            color: var(--text-primary);
+            font-weight: 600;
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--border-color-soft);
+            text-align: left;
+        }
+
+        .content-section h2 i {
+            margin-right: 0.6rem;
+            color: var(--main-green);
+        }
+
+        /* Search & Filter Bar */
+        .controls-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: flex-end;
+        }
+
+        .search-form {
+            display: flex;
+            flex-grow: 1;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        .search-form input[type="text"],
+        .search-form input[type="date"] {
+            flex: 1 1 200px;
+            padding: 0.75rem 1rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color-input);
+            font-size: 0.95rem;
+            transition: border-color var(--transition-main), box-shadow var(--transition-main);
+        }
+
+        .search-form input:focus {
+            border-color: var(--main-green);
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(76, 175, 80, 0.25);
+        }
+
+        .btn {
+            padding: 0.75rem 1.2rem;
+            color: var(--text-light);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: background-color var(--transition-main), transform var(--transition-main), box-shadow var(--transition-main);
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            line-height: 1.2;
+        }
+
+        .search-form .btn {
+            background-color: var(--accent-blue);
+        }
+
+        .search-form .btn:hover {
+            background-color: var(--accent-blue-hover);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .status-filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-status-filter {
+            background-color: var(--background-body);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color-input);
+        }
+
+        .btn-status-filter.active,
+        .btn-status-filter:hover {
+            background-color: var(--accent-blue);
+            color: var(--text-light);
+            border-color: var(--accent-blue);
+        }
+
+        /* Ordonnances Container & Cards */
+        .ordonnances-container {
+            display: grid;
+            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
+
+        .ordonnance-card {
+            background: var(--background-card);
+            border: 1px solid var(--border-color-soft);
+            padding: 1.25rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            transition: transform var(--transition-main), box-shadow var(--transition-main);
+        }
+
+        .ordonnance-card.status-en-attente {
+            border-left: 4px solid var(--warning-color);
+        }
+
+        .ordonnance-card.status-livre {
+            border-left: 4px solid var(--main-green);
+            opacity: 0.85;
+        }
+
+        .ordonnance-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .ordonnance-card h3 {
+            margin-top: 0;
+            margin-bottom: 0.75rem;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .ordonnance-card p {
+            margin: 0.4rem 0;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .ordonnance-card p strong {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .ordonnance-card-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .btn-action {
+            font-size: 0.85rem;
+            padding: 0.5rem 1rem;
+        }
+
+        .btn-details {
+            background-color: var(--accent-blue);
+            color: var(--text-light);
+        }
+
+        .btn-details:hover {
+            background-color: var(--accent-blue-hover);
+        }
+
+        .btn-deliver {
+            background-color: var(--main-green);
+        }
+
+        .btn-deliver:hover {
+            background-color: var(--main-green-hover);
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--background-card);
+            padding: 1.5rem 2rem;
+            text-align: center;
+            color: var(--text-secondary);
+            margin-top: auto;
+            border-top: 1px solid var(--border-color-soft);
+            font-size: 0.875rem;
+        }
+
+        footer .social-icons {
+            margin-bottom: 0.75rem;
+        }
+
+        footer .social-icons a {
+            margin: 0 0.75rem;
+            color: var(--main-green);
+            font-size: 1.2rem;
+            transition: color var(--transition-main), transform var(--transition-main);
+        }
+
+        footer .social-icons a:hover {
+            color: var(--main-green-hover);
+            transform: scale(1.1);
+        }
+
+        footer .copyright {
+            font-size: 0.85em;
+        }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 280px;
+            background-color: var(--text-primary);
+            color: #fff;
+            text-align: center;
+            border-radius: var(--border-radius);
+            padding: 0.9rem 1.2rem;
+            position: fixed;
+            z-index: 2050;
+            left: 50%;
+            bottom: 25px;
+            transform: translateX(-50%) translateY(20px);
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease, visibility 0s linear 0.3s;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.15);
+            font-size: 0.9rem;
+        }
+
+        #toast.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+
+        #toast.success {
+            background-color: var(--success-color);
+        }
+
+        #toast.error {
+            background-color: var(--danger-color);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            header[role="banner"] {
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+            }
+
+            main.container {
+                padding: 1.5rem 1rem;
+            }
+
+            main > h1 {
+                font-size: 1.6em;
+            }
+
+            .content-section {
+                padding: 1.25rem;
+            }
+
+            .content-section h2 {
+                font-size: 1.25rem;
+            }
+
+            .controls-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .search-form input,
+            .search-form button,
+            .status-filter-buttons button {
+                width: 100%;
+                margin-bottom: 0.75rem;
+            }
+
+            .status-filter-buttons {
+                flex-direction: column;
+            }
+
+            .ordonnances-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            html {
+                scroll-behavior: auto;
+            }
+
+            * {
+                animation-duration: 0.001s !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.001s !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header role="banner">
+        <a href="{% url 'index' %}" class="logo" aria-label="Accueil MediCare+">
+            <i class="fas fa-heartbeat" aria-hidden="true"></i> Medicare+
+        </a>
+        <nav aria-label="Navigation principale">
+            <ul>
+                <li><a href="{% url 'index' %}"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1><i class="fas fa-pills"></i> Espace Pharmacien</h1>
+
+        <section class="content-section">
+            <h2><i class="fas fa-filter"></i> Filtres et Recherche</h2>
+            <div class="controls-bar">
+                <form class="search-form" id="searchOrdonnanceForm">
+                    <input type="text" id="searchNom" placeholder="Nom patient/médecin...">
+                    <input type="date" id="searchDate">
+                    <button type="submit" class="btn"><i class="fas fa-search"></i> Rechercher</button>
+                </form>
+                <div class="status-filter-buttons">
+                    <button type="button" class="btn btn-status-filter active" data-status-filter="En attente">
+                        <i class="fas fa-hourglass-half"></i> En Attente
+                    </button>
+                    <button type="button" class="btn btn-status-filter" data-status-filter="Livré">
+                        <i class="fas fa-check-double"></i> Livrées
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-section">
+            <h2 id="ordonnancesSectionTitle"><i class="fas fa-list-alt"></i> Ordonnances en Attente</h2>
+            <div class="ordonnances-container" id="ordonnancesList">
+                <!-- Les ordonnances seront ajoutées ici dynamiquement -->
+                </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="social-icons">
+            <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+            <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+            <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+            <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+        </div>
+        <div class="copyright">
+            &copy; <span id="current-year">2025</span> MediCare+. Tous droits réservés.
+        </div>
+    </footer>
+
+    <div id="toast" class="toast">Message</div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ORDONNANCES_STORAGE_KEY = "medicare_plus_ordonnances_v3";
+            const ordonnancesListContainer = document.getElementById("ordonnancesList");
+            const searchForm = document.getElementById("searchOrdonnanceForm");
+            const searchNomInput = document.getElementById("searchNom");
+            const searchDateInput = document.getElementById("searchDate");
+            const statusFilterButtons = document.querySelectorAll(".btn-status-filter");
+            const ordonnancesSectionTitle = document.getElementById("ordonnancesSectionTitle");
+
+            const toastEl = document.getElementById('toast');
+            let toastTimeout;
+
+            let allOrdonnances = [];
+            let currentStatusFilter = "En attente";
+
+            function showToast(message, isError = false, isSuccess = false) {
+                clearTimeout(toastTimeout);
+                toastEl.textContent = message;
+                toastEl.className = 'toast show';
+                if (isError) toastEl.classList.add('error');
+                if (isSuccess) toastEl.classList.add('success');
+                toastTimeout = setTimeout(() => { toastEl.classList.remove('show'); }, 3000);
+            }
+
+            function escapeHTML(str) {
+                if (typeof str !== 'string') return String(str);
+                return str.replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#039;');
+            }
+
+            function loadOrdonnances() {
+                try {
+                    const storedData = localStorage.getItem(ORDONNANCES_STORAGE_KEY);
+                    allOrdonnances = storedData ? JSON.parse(storedData) : [];
+                    if (!Array.isArray(allOrdonnances)) allOrdonnances = [];
+                } catch (e) {
+                    console.error("Erreur chargement ordonnances:", e);
+                    allOrdonnances = [];
+                    showToast("Erreur de chargement des ordonnances.", true);
+                }
+            }
+
+            function saveOrdonnances() {
+                try {
+                    localStorage.setItem(ORDONNANCES_STORAGE_KEY, JSON.stringify(allOrdonnances));
+                } catch (e) {
+                    console.error("Erreur sauvegarde ordonnances:", e);
+                    showToast("Erreur de sauvegarde.", true);
+                }
+            }
+
+            function renderOrdonnances() {
+                ordonnancesListContainer.innerHTML = "";
+                const nomQuery = searchNomInput.value.toLowerCase();
+                const dateQuery = searchDateInput.value;
+
+                const filteredOrdonnances = allOrdonnances
+                    .filter(ord => {
+                        const matchStatus = ord.statut === currentStatusFilter;
+                        const matchNom = !nomQuery || 
+                            (ord.patient && ord.patient.toLowerCase().includes(nomQuery)) || 
+                            (ord.medecin && ord.medecin.toLowerCase().includes(nomQuery));
+                        const matchDate = !dateQuery || (ord.date && ord.date.startsWith(dateQuery));
+                        return matchStatus && matchNom && matchDate;
+                    })
+                    .sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                if (filteredOrdonnances.length === 0) {
+                    ordonnancesListContainer.innerHTML = `
+                        <p style='text-align:center; color:var(--text-secondary); padding:1rem;'>
+                            Aucune ordonnance ${currentStatusFilter.toLowerCase()} ne correspond à vos critères.
+                        </p>`;
+                    return;
+                }
+
+                ordonnancesSectionTitle.innerHTML = `
+                    <i class="fas ${currentStatusFilter === 'En attente' ? 'fa-hourglass-half' : 'fa-check-double'}"></i>
+                    Ordonnances ${currentStatusFilter === 'En attente' ? 'en Attente' : 'Livrées'}
+                `;
+
+                filteredOrdonnances.forEach(ord => {
+                    const card = document.createElement('div');
+                    card.className = `ordonnance-card status-${ord.statut.toLowerCase().replace(' ', '-')}`;
+                    card.dataset.ordonnanceId = ord.id;
+
+                    let deliveryInfo = '';
+                    if (ord.statut === "Livré" && ord.deliveryTimestamp) {
+                        deliveryInfo = `
+                            <p>
+                                <small style="color:var(--success-color);">
+                                    <em>Livrée le: ${new Date(ord.deliveryTimestamp).toLocaleString('fr-FR', {
+                                        dateStyle: 'medium',
+                                        timeStyle: 'short'
+                                    })}</em>
+                                </small>
+                            </p>`;
+                    }
+
+                    let notesInfo = '';
+                    if (ord.pharmacistNotes) {
+                        notesInfo = `
+                            <p>
+                                <small>
+                                    <em>Notes Pharma: ${escapeHTML(ord.pharmacistNotes.substring(0, 35))}${
+                                        ord.pharmacistNotes.length > 35 ? '...' : ''
+                                    }</em>
+                                </small>
+                            </p>`;
+                    }
+
+                    card.innerHTML = `
+                        <h3>Patient : ${escapeHTML(ord.patient)}</h3>
+                        <p><strong><i class="fas fa-calendar-alt"></i> Date :</strong> ${
+                            escapeHTML(new Date(ord.date).toLocaleDateString('fr-FR'))
+                        }</p>
+                        <p><strong><i class="fas fa-user-doctor"></i> Médecin :</strong> ${
+                            escapeHTML(ord.medecin)
+                        }</p>
+                        <p><strong><i class="fas fa-pills"></i> Médicaments (aperçu) :</strong> ${
+                            escapeHTML(ord.medicaments.substring(0, 50))
+                        }${ord.medicaments.length > 50 ? '...' : ''}</p>
+                        ${deliveryInfo}
+                        ${notesInfo}
+                        <div class="ordonnance-card-actions">
+                            <button class="btn btn-details btn-action" data-action="details">
+                                <i class="fas fa-eye"></i> Détails
+                            </button>
+                            ${ord.statut === "En attente" ? `
+                                <button class="btn btn-deliver btn-action" data-action="deliver">
+                                    <i class="fas fa-check-circle"></i> Livrée
+                                </button>
+                            ` : ''}
+                        </div>
+                    `;
+                    ordonnancesListContainer.appendChild(card);
+                });
+            }
+
+            // Event Listeners
+            searchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                renderOrdonnances();
+            });
+
+            searchNomInput.addEventListener('input', () => renderOrdonnances());
+            searchDateInput.addEventListener('input', () => renderOrdonnances());
+
+            statusFilterButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    statusFilterButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    currentStatusFilter = this.dataset.statusFilter;
+                    renderOrdonnances();
+                });
+            });
+
+            ordonnancesListContainer.addEventListener('click', function(e) {
+                const targetButton = e.target.closest('button[data-action]');
+                if (!targetButton) return;
+
+                const card = targetButton.closest('.ordonnance-card');
+                const ordonnanceId = parseInt(card.dataset.ordonnanceId);
+                const action = targetButton.dataset.action;
+
+                if (action === 'deliver') {
+                    if (confirm("Confirmez-vous la livraison de cette ordonnance ?")) {
+                        const index = allOrdonnances.findIndex(ord => ord.id === ordonnanceId);
+                        if (index !== -1) {
+                            allOrdonnances[index].statut = "Livré";
+                            allOrdonnances[index].deliveryTimestamp = new Date().toISOString();
+                            saveOrdonnances();
+                            showToast("Ordonnance marquée comme livrée.", false, true);
+                            renderOrdonnances();
+                        }
+                    }
+                }
+            });
+
+            // Initialisation
+            loadOrdonnances();
+            renderOrdonnances();
+            const currentYearSpan = document.getElementById('current-year');
+            if (currentYearSpan) currentYearSpan.textContent = new Date().getFullYear();
+        });
+    </script>
+</body>
+</html>

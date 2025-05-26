@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Espace Médecin</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --accent-color: #e74c3c;
+            --background-color: #f5f6fa;
+            --text-color: #2c3e50;
+            --success-color: #2ecc71;
+            --warning-color: #f1c40f;
+            --danger-color: #e74c3c;
+            --border-radius: 8px;
+            --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        .card h2 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .appointment-list, .ordonnance-list {
+            list-style: none;
+        }
+
+        .appointment-item, .ordonnance-item {
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+            transition: var(--transition);
+        }
+
+        .appointment-item:hover, .ordonnance-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .appointment-item:last-child, .ordonnance-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background-color: var(--secondary-color);
+            color: white;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            border: none;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-success {
+            background-color: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background-color: #27ae60;
+        }
+
+        .status {
+            display: inline-block;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .status-upcoming {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+
+        .status-past {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 2rem;
+            color: #7f8c8d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .card {
+                padding: 1rem;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        /* Améliorations d'accessibilité */
+        .btn:focus, .card:focus {
+            outline: 3px solid var(--secondary-color);
+            outline-offset: 2px;
+        }
+
+        /* Styles pour les messages */
+        .messages {
+            margin-bottom: 1rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+        }
+
+        .message-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>Espace Médecin</h1>
+        </header>
+
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="grid">
+            <div class="card">
+                <h2>Rendez-vous à venir</h2>
+                {% if upcoming_appointments %}
+                <ul class="appointment-list">
+                    {% for appointment in upcoming_appointments %}
+                    <li class="appointment-item">
+                        <p><strong>Patient:</strong> {{ appointment.patient.profile.user.get_full_name }}</p>
+                        <p><strong>Date:</strong> {{ appointment.date }}</p>
+                        <p><strong>Heure:</strong> {{ appointment.time }}</p>
+                        <p><strong>Motif:</strong> {{ appointment.reason }}</p>
+                        <span class="status status-upcoming">À venir</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <p>Aucun rendez-vous à venir</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h2>Rendez-vous passés</h2>
+                {% if past_appointments %}
+                <ul class="appointment-list">
+                    {% for appointment in past_appointments %}
+                    <li class="appointment-item">
+                        <p><strong>Patient:</strong> {{ appointment.patient.profile.user.get_full_name }}</p>
+                        <p><strong>Date:</strong> {{ appointment.date }}</p>
+                        <p><strong>Heure:</strong> {{ appointment.time }}</p>
+                        <p><strong>Motif:</strong> {{ appointment.reason }}</p>
+                        <span class="status status-past">Passé</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <p>Aucun rendez-vous passé</p>
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="card">
+                <h2>Dernières ordonnances</h2>
+                {% if ordonnances %}
+                <ul class="ordonnance-list">
+                    {% for ordonnance in ordonnances %}
+                    <li class="ordonnance-item">
+                        <p><strong>Patient:</strong> {{ ordonnance.patient.profile.user.get_full_name }}</p>
+                        <p><strong>Date:</strong> {{ ordonnance.issued_at|date:"d/m/Y" }}</p>
+                        <a href="{% url 'ordonnance_view' %}" class="btn">Voir l'ordonnance</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <div class="empty-state">
+                    <p>Aucune ordonnance récente</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="actions">
+            <a href="{% url 'ordonnance_view' %}" class="btn">Gérer les ordonnances</a>
+            <a href="{% url 'logout' %}" class="btn btn-danger">Déconnexion</a>
+        </div>
+    </div>
+</body>
+</html> 

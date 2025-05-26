@@ -1,0 +1,138 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-wrench'></i> Maintenance</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaintenanceModal">
+            <i class='bx bx-plus'></i> Nouvelle Maintenance
+        </button>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tableau des maintenances -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Équipement</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Date prévue</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for maintenance in maintenances %}
+                        <tr>
+                            <td>{{ maintenance.equipement.nom }}</td>
+                            <td>{{ maintenance.type }}</td>
+                            <td>
+                                <span class="badge {% if maintenance.status == 'Planifiée' %}bg-info{% elif maintenance.status == 'En cours' %}bg-warning{% else %}bg-success{% endif %}">
+                                    {{ maintenance.status }}
+                                </span>
+                            </td>
+                            <td>{{ maintenance.date_prevue }}</td>
+                            <td>
+                                {% if maintenance.status != 'Terminée' %}
+                                <button class="btn btn-sm btn-success" onclick="completeMaintenance({{ maintenance.id }})">
+                                    <i class='bx bx-check'></i> Terminer
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucune maintenance planifiée</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Maintenance -->
+<div class="modal fade" id="addMaintenanceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class='bx bx-plus-circle'></i> Nouvelle Maintenance</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_maintenance">
+                    <div class="mb-3">
+                        <label class="form-label">Équipement</label>
+                        <select class="form-select" name="equipement" required>
+                            <option value="">Sélectionner un équipement</option>
+                            {% for equipement in equipements %}
+                            <option value="{{ equipement.id }}">{{ equipement.nom }} ({{ equipement.type }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type de maintenance</label>
+                        <select class="form-select" name="type_maintenance" required>
+                            <option value="">Sélectionner un type</option>
+                            {% for type in types_maintenance %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date prévue</label>
+                        <input type="date" class="form-control" name="date_prevue" required min="{{ today|date:'Y-m-d' }}">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3" required></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Planifier</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function completeMaintenance(id) {
+    if (confirm('Marquer cette maintenance comme terminée ?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            {% csrf_token %}
+            <input type="hidden" name="action" value="complete_maintenance">
+            <input type="hidden" name="maintenance_id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Initialiser le champ de date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="date_prevue"]').min = today;
+});
+</script>
+{% endblock %} 

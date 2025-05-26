@@ -1,0 +1,18 @@
+{% block content %}
+<h1>🔐Connexion</h1>
+<p>Bienvenue sur notre plateforme de suivi santé. Veuillez vous connecter pour accéder à votre compte.</p>
+
+    <form method="POST" action="{% url 'connexion' %}">
+    {% csrf_token %}
+    <label for="username">Nom d'utilisateur</label>
+    <input type="text" name="username" required>
+
+    <label for="password">Mot de passe</label>
+    <input type="password" name="password" required>
+
+    <button type="submit">Se connecter</button>
+</form>
+
+        <p>Pas encore inscrit ? <a href="{% url 'inscription' %}">Créer un compte</a></p>
+
+{% endblock %}

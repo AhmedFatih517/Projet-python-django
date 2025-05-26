@@ -1,0 +1,238 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-laptop'></i> Équipements Médicaux</h2>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addEquipmentModal">
+            <i class='bx bx-plus'></i> Nouvel Équipement
+        </button>
+    </div>
+
+    {% if messages %}
+    <div class="messages mb-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Tableau des équipements -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Type</th>
+                            <th>Statut</th>
+                            <th>Salle</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for equipement in equipements %}
+                        <tr>
+                            <td>{{ equipement.nom }}</td>
+                            <td>{{ equipement.type }}</td>
+                            <td>
+                                <span class="badge {% if equipement.status == 'Opérationnel' %}bg-success{% elif equipement.status == 'En maintenance' %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ equipement.status }}
+                                </span>
+                            </td>
+                            <td>{{ equipement.salle.numero|default:"Non assigné" }}</td>
+                            <td>
+                                <button class="btn btn-sm btn-info" onclick="viewEquipment({{ equipement.id }})">
+                                    <i class='bx bx-show'></i>
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="editEquipment({{ equipement.id }})">
+                                    <i class='bx bx-edit'></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteEquipment({{ equipement.id }})">
+                                    <i class='bx bx-trash'></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">Aucun équipement enregistré</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Ajout Équipement -->
+<div class="modal fade" id="addEquipmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class='bx bx-plus-circle'></i> Nouvel Équipement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="add_equipment">
+                    <div class="mb-3">
+                        <label class="form-label">Nom de l'équipement</label>
+                        <input type="text" class="form-control" name="nom" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Type d'équipement</label>
+                        <select class="form-select" name="type_equip" required>
+                            <option value="">Sélectionner un type</option>
+                            {% for type in types_equipements %}
+                            <option value="{{ type }}">{{ type }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Salle</label>
+                        <select class="form-select" name="salle">
+                            <option value="">Non assigné</option>
+                            {% for salle in salles %}
+                            <option value="{{ salle.id }}">{{ salle.numero }} ({{ salle.type }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="text-end">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                        <button type="submit" class="btn btn-primary">Ajouter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal pour voir/éditer un équipement -->
+<div class="modal fade" id="equipmentModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <!-- Le contenu sera injecté dynamiquement -->
+        </div>
+    </div>
+</div>
+
+<script>
+function viewEquipment(id) {
+    fetch(`/admin/equipment/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const modalContent = `
+                <div class="modal-header">
+                    <h5 class="modal-title">Détails de l'Équipement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Nom:</strong> ${data.nom}</p>
+                    <p><strong>Type:</strong> ${data.type}</p>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <p><strong>Salle:</strong> ${data.salle || 'Non assigné'}</p>
+                    <p><strong>Description:</strong> ${data.description || 'Aucune description'}</p>
+                </div>
+            `;
+            document.querySelector('#equipmentModal .modal-content').innerHTML = modalContent;
+            const modal = new bootstrap.Modal(document.getElementById('equipmentModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de la récupération des détails de l\'équipement');
+        });
+}
+
+function editEquipment(id) {
+    fetch(`/admin/equipment/${id}/`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.error) {
+                alert(data.error);
+                return;
+            }
+            const modalContent = `
+                <div class="modal-header">
+                    <h5 class="modal-title">Modifier l'Équipement</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="edit_equipment">
+                        <input type="hidden" name="equip_id" value="${id}">
+                        <div class="mb-3">
+                            <label class="form-label">Nom de l'équipement</label>
+                            <input type="text" class="form-control" name="nom" value="${data.nom}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Type d'équipement</label>
+                            <select class="form-select" name="type_equip" required>
+                                {% for type in types_equipements %}
+                                <option value="{{ type }}" ${data.type === '{{ type }}' ? 'selected' : ''}>{{ type }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Salle</label>
+                            <select class="form-select" name="salle">
+                                <option value="">Non assigné</option>
+                                {% for salle in salles %}
+                                <option value="{{ salle.id }}" ${data.salle === '{{ salle.numero }}' ? 'selected' : ''}>
+                                    {{ salle.numero }} ({{ salle.type }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" name="description" rows="3">${data.description || ''}</textarea>
+                        </div>
+                        <div class="text-end">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                            <button type="submit" class="btn btn-primary">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            `;
+            document.querySelector('#equipmentModal .modal-content').innerHTML = modalContent;
+            const modal = new bootstrap.Modal(document.getElementById('equipmentModal'));
+            modal.show();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('Une erreur est survenue lors de la récupération des détails de l\'équipement');
+        });
+}
+
+function deleteEquipment(id) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cet équipement ?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.innerHTML = `
+            {% csrf_token %}
+            <input type="hidden" name="action" value="delete_equipment">
+            <input type="hidden" name="equip_id" value="${id}">
+        `;
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+</script>
+{% endblock %} 

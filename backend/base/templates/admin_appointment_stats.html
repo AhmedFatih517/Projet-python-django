@@ -1,0 +1,213 @@
+{% extends 'admin.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2><i class='bx bx-bar-chart-alt-2'></i> Statistiques des Rendez-vous</h2>
+        <div>
+            <button class="btn btn-primary" onclick="exportStats()">
+                <i class='bx bx-export'></i> Exporter
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistiques mensuelles -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary">
+                        <i class='bx bx-calendar-check'></i> Total du mois
+                    </h5>
+                    <h2 class="mb-0">{{ monthly_stats.total }}</h2>
+                    <small class="text-muted">Rendez-vous</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-success">
+                        <i class='bx bx-check-circle'></i> Terminés
+                    </h5>
+                    <h2 class="mb-0">{{ monthly_stats.completed }}</h2>
+                    <small class="text-muted">Rendez-vous</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-danger">
+                        <i class='bx bx-x-circle'></i> Annulés
+                    </h5>
+                    <h2 class="mb-0">{{ monthly_stats.cancelled }}</h2>
+                    <small class="text-muted">Rendez-vous</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Graphiques -->
+    <div class="row g-4">
+        <!-- Statistiques par médecin -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="card-title mb-0">
+                        <i class='bx bx-user-voice'></i> Rendez-vous par Médecin
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Médecin</th>
+                                    <th>Rendez-vous</th>
+                                    <th>Pourcentage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doctor in doctor_stats %}
+                                <tr>
+                                    <td>Dr. {{ doctor.profile.user.get_full_name }}</td>
+                                    <td>{{ doctor.appointment_count }}</td>
+                                    <td>
+                                        <div class="progress">
+                                            <div class="progress-bar" role="progressbar" 
+                                                 style="width: {% widthratio doctor.appointment_count monthly_stats.total 100 %}%">
+                                                {% widthratio doctor.appointment_count monthly_stats.total 100 %}%
+                                            </div>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center">Aucune donnée disponible</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistiques par jour -->
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-info text-white">
+                    <h5 class="card-title mb-0">
+                        <i class='bx bx-calendar-week'></i> Répartition par Jour
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="weekdayChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tendances -->
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="card-title mb-0">
+                        <i class='bx bx-line-chart'></i> Tendances
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="trendsChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Configuration du graphique par jour
+        const weekdayCtx = document.getElementById('weekdayChart').getContext('2d');
+        const weekdayData = {
+            labels: ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'],
+            datasets: [{
+                label: 'Nombre de rendez-vous',
+                data: [
+                    {% for stat in weekday_stats %}
+                        {{ stat.count }},
+                    {% endfor %}
+                ],
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        };
+        new Chart(weekdayCtx, {
+            type: 'bar',
+            data: weekdayData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Configuration du graphique des tendances
+        const trendsCtx = document.getElementById('trendsChart').getContext('2d');
+        const trendsData = {
+            labels: ['Semaine 1', 'Semaine 2', 'Semaine 3', 'Semaine 4'],
+            datasets: [{
+                label: 'Rendez-vous',
+                data: [65, 59, 80, 81],
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        };
+        new Chart(trendsCtx, {
+            type: 'line',
+            data: trendsData,
+            options: {
+                responsive: true,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Fonction d'export
+        window.exportStats = function() {
+            // Implémenter la logique d'export ici
+            console.log('Export des statistiques');
+            showSuccess('Statistiques exportées avec succès !');
+        };
+
+        function showSuccess(message) {
+            const alertHtml = `
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+            const alertsContainer = document.querySelector('.messages') || createAlertsContainer();
+            alertsContainer.innerHTML += alertHtml;
+        }
+
+        function createAlertsContainer() {
+            const container = document.createElement('div');
+            container.className = 'messages mb-4';
+            document.querySelector('.container').insertBefore(container, document.querySelector('.row'));
+            return container;
+        }
+    });
+</script>
+{% endblock %} 

@@ -1,0 +1,706 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Agenda - Medicare+{% endblock %}
+
+{% block content %}
+<div class="agenda-container">
+    <div class="agenda-header">
+        <h1><i class="fas fa-calendar-alt"></i> Mon Agenda</h1>
+        <button class="btn-primary" onclick="showAddAppointmentModal()">
+            <i class="fas fa-plus"></i> Nouveau rendez-vous
+        </button>
+    </div>
+
+    <div class="agenda-grid">
+        <!-- Calendrier -->
+        <div class="calendar-section">
+            <div class="calendar-nav">
+                <button id="prevMonth" class="btn-icon">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <h2 id="currentMonth">Mars 2024</h2>
+                <button id="nextMonth" class="btn-icon">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            
+            <div class="calendar-grid">
+                <div class="calendar-header">
+                    <span>Dim</span>
+                    <span>Lun</span>
+                    <span>Mar</span>
+                    <span>Mer</span>
+                    <span>Jeu</span>
+                    <span>Ven</span>
+                    <span>Sam</span>
+                </div>
+                <div id="calendar-days" class="calendar-days">
+                    <!-- Les jours seront ajoutés par JavaScript -->
+                </div>
+            </div>
+
+            <div class="calendar-legend">
+                <div class="legend-item">
+                    <span class="dot available"></span>
+                    <span>Disponible</span>
+                </div>
+                <div class="legend-item">
+                    <span class="dot busy"></span>
+                    <span>Occupé</span>
+                </div>
+                <div class="legend-item">
+                    <span class="dot selected"></span>
+                    <span>Sélectionné</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Liste des rendez-vous -->
+        <div class="appointments-section">
+            <div class="appointments-header">
+                <div class="date-navigation">
+                    <button class="btn-text" onclick="showToday()">
+                        <i class="fas fa-calendar-day"></i> Aujourd'hui
+                    </button>
+                    <div class="date-selector">
+                        <button class="btn-icon" onclick="previousDay()">
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <h3 id="currentDate">15 Mars 2024</h3>
+                        <button class="btn-icon" onclick="nextDay()">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="view-options">
+                    <button class="btn-icon active" title="Vue journalière">
+                        <i class="fas fa-calendar-day"></i>
+                    </button>
+                    <button class="btn-icon" title="Vue hebdomadaire">
+                        <i class="fas fa-calendar-week"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="timeline">
+                {% for hour in "89101112131415161718"|make_list %}
+                <div class="timeline-slot">
+                    <div class="time-label">{{ hour }}:00</div>
+                    <div class="time-slot">
+                        {% for rdv in appointments %}
+                        {% if rdv.time|date:"H" == hour %}
+                        <div class="appointment-card {{ rdv.status }}">
+                            <div class="appointment-time">
+                                {{ rdv.time|date:"H:i" }}
+                            </div>
+                            <div class="appointment-info">
+                                <h4>{{ rdv.patient.profile.user.get_full_name }}</h4>
+                                <p>{{ rdv.reason }}</p>
+                            </div>
+                            <div class="appointment-actions">
+                                {% if rdv.status == 'en_attente' %}
+                                <button class="btn-icon success" onclick="confirmAppointment({{ rdv.id }})" title="Confirmer">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn-icon danger" onclick="rejectAppointment({{ rdv.id }})" title="Rejeter">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                {% endif %}
+                                <button class="btn-icon info" onclick="showAppointmentDetails({{ rdv.id }})" title="Détails">
+                                    <i class="fas fa-info-circle"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Nouveau Rendez-vous -->
+<div id="appointmentModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Nouveau Rendez-vous</h2>
+            <button class="btn-icon" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <form id="appointmentForm" method="POST">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="patient">Patient</label>
+                <select id="patient" name="patient" required>
+                    <option value="">Sélectionner un patient</option>
+                    {% for patient in patients %}
+                    <option value="{{ patient.id }}">{{ patient.profile.user.get_full_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="date">Date</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                <div class="form-group">
+                    <label for="time">Heure</label>
+                    <input type="time" id="time" name="time" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="reason">Motif</label>
+                <textarea id="reason" name="reason" required></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-secondary" onclick="closeModal()">Annuler</button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+:root {
+    --primary-color: #4CAF50;
+    --primary-light: #81C784;
+    --primary-dark: #388E3C;
+    --secondary-color: #2196F3;
+    --success-color: #4CAF50;
+    --warning-color: #FFC107;
+    --danger-color: #f44336;
+    --info-color: #2196F3;
+    --text-color: #333;
+    --text-light: #666;
+    --bg-light: #f5f5f5;
+    --border-color: #ddd;
+    --shadow: 0 2px 4px rgba(0,0,0,0.1);
+    --radius: 8px;
+}
+
+.agenda-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.agenda-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.agenda-header h1 {
+    font-size: 2rem;
+    color: var(--text-color);
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.agenda-grid {
+    display: grid;
+    grid-template-columns: 400px 1fr;
+    gap: 2rem;
+}
+
+/* Styles du calendrier */
+.calendar-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.calendar-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.calendar-nav h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.calendar-grid {
+    margin-bottom: 1.5rem;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: 500;
+    color: var(--text-light);
+    margin-bottom: 0.5rem;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+}
+
+.calendar-day {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius);
+    cursor: pointer;
+    position: relative;
+    font-size: 0.9rem;
+}
+
+.calendar-day:hover {
+    background-color: var(--bg-light);
+}
+
+.calendar-day.today {
+    background-color: var(--primary-light);
+    color: white;
+}
+
+.calendar-day.selected {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.calendar-day.has-appointments::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+}
+
+.calendar-legend {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-light);
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.dot.available { background-color: var(--success-color); }
+.dot.busy { background-color: var(--danger-color); }
+.dot.selected { background-color: var(--primary-color); }
+
+/* Styles des rendez-vous */
+.appointments-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+}
+
+.appointments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.date-navigation {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.date-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.date-selector h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    min-width: 120px;
+    text-align: center;
+}
+
+.timeline {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.timeline-slot {
+    display: flex;
+    gap: 1rem;
+}
+
+.time-label {
+    width: 60px;
+    color: var(--text-light);
+    font-size: 0.9rem;
+    text-align: right;
+    padding-top: 0.5rem;
+}
+
+.time-slot {
+    flex: 1;
+    min-height: 60px;
+    border-left: 2px solid var(--border-color);
+    padding-left: 1rem;
+    position: relative;
+}
+
+/* Boutons et contrôles */
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background-color: var(--bg-light);
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 0.75rem 1.5rem;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background-color: var(--border-color);
+}
+
+.btn-icon {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-light);
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
+}
+
+.btn-icon:hover {
+    background-color: var(--bg-light);
+    color: var(--text-color);
+}
+
+.btn-icon.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    padding: 0.5rem 1rem;
+    cursor: pointer;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: var(--radius);
+    transition: all 0.3s ease;
+}
+
+.btn-text:hover {
+    background-color: var(--bg-light);
+}
+
+/* Cartes de rendez-vous */
+.appointment-card {
+    background: var(--bg-light);
+    border-radius: var(--radius);
+    padding: 1rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: all 0.3s ease;
+}
+
+.appointment-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+}
+
+.appointment-card.en_attente {
+    border-left: 4px solid var(--warning-color);
+}
+
+.appointment-card.confirme {
+    border-left: 4px solid var(--success-color);
+}
+
+.appointment-time {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.appointment-info {
+    flex: 1;
+}
+
+.appointment-info h4 {
+    margin: 0;
+    color: var(--text-color);
+}
+
+.appointment-info p {
+    margin: 0.25rem 0 0;
+    color: var(--text-light);
+    font-size: 0.9rem;
+}
+
+.appointment-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-icon.success { color: var(--success-color); }
+.btn-icon.danger { color: var(--danger-color); }
+.btn-icon.info { color: var(--info-color); }
+
+/* Modal */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    border-radius: var(--radius);
+    width: 90%;
+    max-width: 500px;
+    margin: 2rem auto;
+    padding: 2rem;
+    position: relative;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-header h2 {
+    margin: 0;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+}
+
+.form-group textarea {
+    height: 100px;
+    resize: vertical;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 1024px) {
+    .agenda-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .agenda-container {
+        padding: 1rem;
+    }
+    
+    .agenda-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    initCalendar();
+    setupEventListeners();
+});
+
+function initCalendar() {
+    const calendar = document.getElementById('calendar-days');
+    const currentDate = new Date();
+    const firstDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    const lastDay = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+    
+    // Ajouter les jours du mois
+    for (let i = 1; i <= lastDay.getDate(); i++) {
+        const day = document.createElement('div');
+        day.className = 'calendar-day';
+        day.textContent = i;
+        
+        if (i === currentDate.getDate()) {
+            day.classList.add('today');
+        }
+        
+        calendar.appendChild(day);
+    }
+}
+
+function setupEventListeners() {
+    // Modal
+    window.showAddAppointmentModal = function() {
+        document.getElementById('appointmentModal').style.display = 'block';
+    }
+    
+    window.closeModal = function() {
+        document.getElementById('appointmentModal').style.display = 'none';
+    }
+    
+    // Fermer le modal en cliquant en dehors
+    window.onclick = function(event) {
+        const modal = document.getElementById('appointmentModal');
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+    
+    // Navigation du calendrier
+    document.getElementById('prevMonth').onclick = function() {
+        // Implémenter la navigation vers le mois précédent
+    }
+    
+    document.getElementById('nextMonth').onclick = function() {
+        // Implémenter la navigation vers le mois suivant
+    }
+}
+
+// Fonctions de gestion des rendez-vous
+function confirmAppointment(id) {
+    if (confirm('Confirmer ce rendez-vous ?')) {
+        fetch(`/confirm-appointment/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    }
+}
+
+function rejectAppointment(id) {
+    if (confirm('Rejeter ce rendez-vous ?')) {
+        fetch(`/reject-appointment/${id}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                location.reload();
+            } else {
+                alert(data.message);
+            }
+        });
+    }
+}
+
+function showAppointmentDetails(id) {
+    // Implémenter l'affichage des détails du rendez-vous
+    alert('Fonctionnalité à venir');
+}
+
+// Navigation dans le temps
+function showToday() {
+    // Implémenter le retour à aujourd'hui
+}
+
+function previousDay() {
+    // Implémenter la navigation vers le jour précédent
+}
+
+function nextDay() {
+    // Implémenter la navigation vers le jour suivant
+}
+</script>
+{% endblock %}
